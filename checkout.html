@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mon Panier — Les Lampes de Nicky</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <style>
+    .steps {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      margin: 2rem auto;
+      max-width: 500px;
+    }
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      opacity: 0.45;
+    }
+    .step.active { color: var(--teal); opacity: 1; }
+    .step.done   { color: var(--beige); opacity: 0.9; }
+    .step-num {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: currentColor;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700;
+      color: white;
+      flex-shrink: 0;
+    }
+    .step.active .step-num { background: var(--teal); }
+    .step.done   .step-num { background: var(--beige); }
+    .step-sep {
+      flex: 1; height: 1px;
+      background: var(--mint);
+      margin: 0 0.5rem;
+      max-width: 60px;
+    }
+    .secure-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-top: 0.5rem;
+    }
+    .secure-badge svg { color: var(--teal); }
+    #checkout-success {
+      display: none;
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+    #checkout-success .success-icon {
+      width: 80px; height: 80px;
+      background: #e8f8f0;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.5rem;
+      color: #2d8a5a;
+    }
+    #checkout-success h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: var(--dark);
+      margin-bottom: 1rem;
+    }
+    #checkout-success p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      max-width: 440px;
+      margin: 0 auto 2rem;
+    }
+    .livraison-note {
+      background: rgba(17,100,102,0.07);
+      border-left: 3px solid var(--teal);
+      border-radius: 0 3px 3px 0;
+      padding: 0.7rem 1rem;
+      font-size: 0.83rem;
+      color: var(--teal);
+      margin-bottom: 1rem;
+    }
+    .cgv-check {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      margin-bottom: 1.2rem;
+    }
+    .cgv-check input { accent-color: var(--teal); margin-top: 2px; flex-shrink:0; }
+    .cgv-check label { font-size: 0.8rem; color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0; }
+    .cgv-check a { color: var(--teal); text-decoration: underline; }
+  </style>
+  <script>(function(){var t=localStorage.getItem("nicky_theme");if(t==="dark")document.documentElement.setAttribute("data-theme","dark");}());</script>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a href="index.html" class="logo">
+    <svg class="logo-icon" viewBox="0 0 44 44" fill="none">
+      <ellipse cx="22" cy="24" rx="14" ry="5" fill="currentColor" opacity="0.15"/>
+      <path d="M10 26 L16 10 L28 10 L34 26 Z" fill="currentColor" opacity="0.9"/>
+      <rect x="20.5" y="26" width="3" height="10" fill="currentColor" opacity="0.7" rx="1"/>
+      <ellipse cx="22" cy="37" rx="7" ry="2.2" fill="currentColor" opacity="0.6"/>
+    </svg>
+    <div class="logo-text">
+      <span class="brand">Les lampes</span>
+      <span class="sub">de Nicky</span>
+    </div>
+  </a>
+  <nav>
+    <a href="index.html">Accueil</a>
+    <a href="articles.html">Boutique</a>
+    <a href="contact.html">Contact</a>
+    <a href="checkout.html" class="nav-cart active">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>
+        <path d="M16 10a4 4 0 01-8 0"/>
+      </svg>
+      Panier
+      <span class="cart-count" style="display:none">0</span>
+    </a>
+  </nav>
+</header>
+
+<!-- PAGE HERO -->
+<div class="page-hero" style="padding: 3rem 2.5rem 2rem;">
+  <span class="eyebrow">Presque là !</span>
+  <h1>Mon panier</h1>
+</div>
+
+<!-- STEPS -->
+<div style="background: white; border-bottom: 1px solid var(--mint); padding: 0.5rem 1rem;">
+  <div class="steps">
+    <div class="step done">
+      <div class="step-num">✓</div>
+      <span>Panier</span>
+    </div>
+    <div class="step-sep"></div>
+    <div class="step active">
+      <div class="step-num">2</div>
+      <span>Livraison</span>
+    </div>
+    <div class="step-sep"></div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <span>Paiement</span>
+    </div>
+    <div class="step-sep"></div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <span>Confirmation</span>
+    </div>
+  </div>
+</div>
+
+<!-- CHECKOUT CONTENT -->
+<section style="background: var(--cream);">
+  <div class="container">
+
+    <!-- SUCCESS MESSAGE -->
+    <div id="checkout-success">
+      <div class="success-icon">
+        <svg width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <h2>Commande confirmée !</h2>
+      <p>
+        Merci pour votre commande. Je prépare votre lampe avec soin dans mon atelier.<br>
+        Vous recevrez un email de confirmation sous peu.
+      </p>
+      <a href="articles.html" class="btn btn-teal">Continuer mes achats</a>
+    </div>
+
+    <!-- CHECKOUT LAYOUT -->
+    <div id="checkout-form-wrapper">
+      <div class="checkout-layout">
+
+        <!-- LEFT : panier + livraison + paiement -->
+        <div>
+
+          <!-- Panier -->
+          <div class="checkout-block" id="cart-block">
+            <h3>
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>
+                <path d="M16 10a4 4 0 01-8 0"/>
+              </svg>
+              Mes articles
+            </h3>
+
+            <!-- Items dynamiques -->
+            <div id="cart-list"></div>
+
+            <!-- Panier vide -->
+            <div id="cart-empty" class="empty-cart" style="display:none;">
+              <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>
+                <path d="M16 10a4 4 0 01-8 0"/>
+              </svg>
+              <p>Votre panier est vide.</p>
+              <a href="articles.html" class="btn btn-teal">Découvrir la boutique</a>
+            </div>
+          </div>
+
+          <!-- Formulaire -->
+          <form id="checkout-form" novalidate>
+
+            <!-- Livraison -->
+            <div class="checkout-block">
+              <h3>
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8Z"/>
+                  <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+                </svg>
+                Adresse de livraison
+              </h3>
+
+              <div class="livraison-note">
+                Livraison offerte dès 80 CHF d'achat · Délai : 5 à 10 jours ouvrés (pièces faites à la main)
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="ship-prenom">Prénom *</label>
+                  <input type="text" id="ship-prenom" placeholder="Prénom" required>
+                </div>
+                <div class="form-group">
+                  <label for="ship-nom">Nom *</label>
+                  <input type="text" id="ship-nom" placeholder="Nom" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="ship-email">Email *</label>
+                <input type="email" id="ship-email" placeholder="votre@email.ch" required>
+              </div>
+
+              <div class="form-group">
+                <label for="ship-adresse">Adresse *</label>
+                <input type="text" id="ship-adresse" placeholder="Numéro et nom de rue" required>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="ship-cp">Code postal *</label>
+                  <input type="text" id="ship-cp" placeholder="75000" required>
+                </div>
+                <div class="form-group">
+                  <label for="ship-ville">Ville *</label>
+                  <input type="text" id="ship-ville" placeholder="Lausanne" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="ship-pays">Pays</label>
+                <select id="ship-pays">
+                  <option value="ch" selected>Suisse</option>
+                  <option value="fr">France</option>
+                  <option value="be">Belgique</option>
+                  <option value="lu">Luxembourg</option>
+                  <option value="de">Allemagne</option>
+                  <option value="es">Espagne</option>
+                  <option value="it">Italie</option>
+                  <option value="other">Autre pays</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Paiement -->
+            <div class="checkout-block">
+              <h3>
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+                </svg>
+                Paiement sécurisé
+              </h3>
+
+              <!-- Méthodes visuelles -->
+              <div class="payment-methods">
+                <div class="pay-method active" data-method="card">Carte bancaire</div>
+                <div class="pay-method" data-method="paypal">PayPal</div>
+                <div class="pay-method" data-method="virement">Virement</div>
+              </div>
+
+              <!-- Carte bancaire -->
+              <div data-payment-form="card">
+                <!-- Carte visuelle interactive -->
+                <div class="card-visual">
+                  <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div class="card-chip"></div>
+                    <svg width="36" height="24" viewBox="0 0 36 24" fill="none" opacity="0.7">
+                      <circle cx="14" cy="12" r="10" fill="#D9B08C" opacity="0.9"/>
+                      <circle cx="22" cy="12" r="10" fill="#FFCB9A" opacity="0.7"/>
+                    </svg>
+                  </div>
+                  <div class="card-number" id="card-number-display">•••• •••• •••• ••••</div>
+                  <div class="card-details">
+                    <div>
+                      <div style="opacity:0.6; font-size:0.65rem; margin-bottom:2px;">Titulaire</div>
+                      <div id="card-name-display">VOTRE NOM</div>
+                    </div>
+                    <div style="text-align:right;">
+                      <div style="opacity:0.6; font-size:0.65rem; margin-bottom:2px;">Expire</div>
+                      <div id="card-exp-display">MM/AA</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="card-name">Nom sur la carte *</label>
+                  <input type="text" id="card-name" placeholder="PRÉNOM NOM" style="text-transform:uppercase;" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="card-number">Numéro de carte *</label>
+                  <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="card-exp">Date d'expiration *</label>
+                    <input type="text" id="card-exp" placeholder="MM/AA" maxlength="5" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="card-cvv">CVV *</label>
+                    <input type="text" id="card-cvv" placeholder="•••" maxlength="4" required>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PayPal -->
+              <div data-payment-form="paypal" style="display:none; text-align:center; padding: 2rem 1rem;">
+                <svg width="120" height="40" viewBox="0 0 120 40" fill="none">
+                  <text y="30" font-family="Arial" font-weight="bold" font-size="24" fill="#003087">Pay</text>
+                  <text x="44" y="30" font-family="Arial" font-weight="bold" font-size="24" fill="#009cde">Pal</text>
+                </svg>
+                <p style="color:var(--muted); font-size:0.9rem; margin-top:1rem;">Vous serez redirigé vers PayPal pour finaliser le paiement en toute sécurité.</p>
+              </div>
+
+              <!-- Virement -->
+              <div data-payment-form="virement" style="display:none; padding: 1rem 0;">
+                <div style="background: var(--mint); border-radius:4px; padding: 1.2rem 1.5rem;">
+                  <p style="font-size:0.85rem; color:var(--dark); line-height:1.8;">
+                    <strong>IBAN :</strong> FR76 XXXX XXXX XXXX XXXX XXXX XXX<br>
+                    <strong>BIC :</strong> XXXXXXXX<br>
+                    <strong>Référence :</strong> Votre prénom + nom<br>
+                    <br>
+                    <span style="color:var(--muted); font-size:0.8rem;">Votre commande sera traitée dès réception du virement (2–3 jours ouvrés).</span>
+                  </p>
+                </div>
+              </div>
+
+              <div class="secure-badge" style="margin-top:1rem;">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                Paiement 100% sécurisé · Données chiffrées SSL
+              </div>
+            </div>
+
+            <!-- CGV + Bouton -->
+            <div class="checkout-block">
+              <div class="cgv-check">
+                <input type="checkbox" id="cgv" required>
+                <label for="cgv">
+                  J'accepte les <a href="#">conditions générales de vente</a> et la <a href="#">politique de confidentialité</a> des Lampes de Nicky.
+                </label>
+              </div>
+
+              <button type="submit" class="btn btn-teal" style="width:100%; font-size:0.95rem; padding:1.1rem; justify-content:center;">
+                Confirmer ma commande →
+              </button>
+
+              <div style="text-align:center; margin-top:1rem;">
+                <a href="articles.html" style="font-size:0.82rem; color:var(--muted); text-decoration:underline;">
+                  ← Continuer mes achats
+                </a>
+              </div>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- RIGHT : récapitulatif -->
+        <div id="order-summary" style="position: sticky; top: 100px;">
+
+          <div class="checkout-block">
+            <h3>
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+                <line x1="8" y1="18" x2="21" y2="18"/>
+                <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
+                <line x1="3" y1="18" x2="3.01" y2="18"/>
+              </svg>
+              Récapitulatif
+            </h3>
+
+            <div class="summary-row">
+              <span>Sous-total</span>
+              <span id="summary-subtotal">0,00 CHF</span>
+            </div>
+            <div class="summary-row">
+              <span>Livraison</span>
+              <span id="summary-shipping">—</span>
+            </div>
+            <div class="summary-row">
+              <span>TVA (20%)</span>
+              <span id="summary-tva">0,00 CHF</span>
+            </div>
+            <div class="summary-row total">
+              <span class="label">Total TTC</span>
+              <span class="total-amount" id="summary-total">0,00 CHF</span>
+            </div>
+          </div>
+
+          <!-- Garanties -->
+          <div class="checkout-block" style="margin-top:0;">
+            <div style="display:flex; flex-direction:column; gap:0.9rem;">
+
+              <div style="display:flex; align-items:center; gap:0.8rem; font-size:0.83rem; color:var(--muted);">
+                <div style="width:32px;height:32px;background:var(--mint);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--teal);">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                </div>
+                <span>Paiement 100% sécurisé</span>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:0.8rem; font-size:0.83rem; color:var(--muted);">
+                <div style="width:32px;height:32px;background:var(--mint);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--teal);">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+                  </svg>
+                </div>
+                <span>Retour sous 14 jours</span>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:0.8rem; font-size:0.83rem; color:var(--muted);">
+                <div style="width:32px;height:32px;background:var(--mint);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--teal);">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+                  </svg>
+                </div>
+                <span>Fait à la main avec amour</span>
+              </div>
+
+              <div style="display:flex; align-items:center; gap:0.8rem; font-size:0.83rem; color:var(--muted);">
+                <div style="width:32px;height:32px;background:var(--mint);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--teal);">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8Z"/>
+                    <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+                  </svg>
+                </div>
+                <span>Livraison soignée emballage recyclé</span>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Note artisanale -->
+          <div style="background: linear-gradient(135deg, var(--dark), var(--teal)); border-radius: 4px; padding: 1.5rem; color: white; text-align:center;">
+            <span style="font-family:'Dancing Script',cursive; font-size:1.1rem; color:var(--peach); display:block; margin-bottom:0.4rem;">Un mot de Nicky</span>
+            <p style="font-size:0.82rem; color:var(--mint); font-weight:300; line-height:1.6;">
+              Chaque lampe est fabriquée sur commande, avec patience et amour. Merci de votre confiance !
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="logo">
+          <svg class="logo-icon" viewBox="0 0 44 44" fill="none">
+            <ellipse cx="22" cy="24" rx="14" ry="5" fill="currentColor" opacity="0.15"/>
+            <path d="M10 26 L16 10 L28 10 L34 26 Z" fill="currentColor" opacity="0.9"/>
+            <rect x="20.5" y="26" width="3" height="10" fill="currentColor" opacity="0.7" rx="1"/>
+            <ellipse cx="22" cy="37" rx="7" ry="2.2" fill="currentColor" opacity="0.6"/>
+          </svg>
+          <div class="logo-text">
+            <span class="brand">Les lampes</span>
+            <span class="sub">de Nicky</span>
+          </div>
+        </a>
+        <p>Des lampes artisanales uniques, conçues avec amour dans un petit atelier.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Boutique</h4>
+        <ul>
+          <li><a href="articles.html">Toutes les lampes</a></li>
+          <li><a href="articles.html?cat=suspension">Suspensions</a></li>
+          <li><a href="articles.html?cat=table">Lampes de table</a></li>
+          <li><a href="articles.html?cat=applique">Appliques murales</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Informations</h4>
+        <ul>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="#">Livraison & retours</a></li>
+          <li><a href="#">Commande sur mesure</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Légal</h4>
+        <ul>
+          <li><a href="#">Mentions légales</a></li>
+          <li><a href="#">CGV</a></li>
+          <li><a href="#">Confidentialité</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 Les Lampes de Nicky · Tous droits réservés</span>
+      <span>Fait avec amour dans mon atelier</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

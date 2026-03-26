@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Les Lampes de Nicky — Lumières artisanales faites main</title>
+  <meta name="description" content="Lampes artisanales faites main par Nicky. Suspensions, lampes de table et appliques murales uniques, créées avec des matériaux naturels.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <script>(function(){var t=localStorage.getItem("nicky_theme");if(t==="dark")document.documentElement.setAttribute("data-theme","dark");}());</script>
+</head>
+<body>
+
+<!-- ════════════════════════════
+     HEADER
+════════════════════════════ -->
+<header>
+  <a href="index.html" class="logo" aria-label="Les Lampes de Nicky — Accueil">
+    <!-- Logo lamp icon -->
+    <svg class="logo-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Glow -->
+      <ellipse cx="22" cy="24" rx="14" ry="5" fill="currentColor" opacity="0.15"/>
+      <!-- Lampshade -->
+      <path d="M10 26 L16 10 L28 10 L34 26 Z" fill="currentColor" opacity="0.9"/>
+      <!-- Inner shade highlight -->
+      <path d="M14 24 L18 12 L26 12 L30 24 Z" fill="white" opacity="0.08"/>
+      <!-- Stem -->
+      <rect x="20.5" y="26" width="3" height="10" fill="currentColor" opacity="0.7" rx="1"/>
+      <!-- Base -->
+      <ellipse cx="22" cy="37" rx="7" ry="2.2" fill="currentColor" opacity="0.6"/>
+      <!-- Bulb glow -->
+      <ellipse cx="22" cy="26.5" rx="6" ry="2" fill="currentColor" opacity="0.25"/>
+    </svg>
+    <div class="logo-text">
+      <span class="brand">Les lampes</span>
+      <span class="sub">de Nicky</span>
+    </div>
+  </a>
+
+  <nav>
+    <a href="index.html" class="active">Accueil</a>
+    <a href="articles.html">Boutique</a>
+    <a href="contact.html">Contact</a>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Mode sombre/clair">
+        <svg class="icon-moon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun"  width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+    <a href="checkout.html" class="nav-cart">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>
+        <path d="M16 10a4 4 0 01-8 0"/>
+      </svg>
+      Panier
+      <span class="cart-count" style="display:none">0</span>
+    </a>
+  </nav>
+</header>
+
+<!-- ════════════════════════════
+     HERO
+════════════════════════════ -->
+<section class="hero">
+  <div class="hero-content">
+    <span class="hero-eyebrow">Bienvenue dans mon atelier</span>
+    <h1>
+      Chaque lampe,
+      <em>une âme unique</em>
+    </h1>
+    <p class="hero-desc">
+      Des créations artisanales faites à la main, avec des matériaux naturels et beaucoup d'amour.
+      Illuminez votre intérieur avec des pièces qui racontent une histoire.
+    </p>
+    <div class="hero-btns">
+      <a href="articles.html" class="btn btn-light">Découvrir la boutique</a>
+      <a href="contact.html" class="btn btn-outline">Me contacter</a>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <!-- Decorative lamp illustration -->
+    <svg class="hero-lamp-svg" viewBox="0 0 300 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Cord -->
+      <line x1="150" y1="0" x2="150" y2="60" stroke="#D9B08C" stroke-width="2.5" stroke-dasharray="4 4"/>
+      <!-- Lampshade outer -->
+      <path d="M75 200 L100 70 L200 70 L225 200 Z" fill="#116466" opacity="0.9"/>
+      <!-- Lampshade inner highlight -->
+      <path d="M95 190 L115 85 L185 85 L205 190 Z" fill="white" opacity="0.06"/>
+      <!-- Shade rim bottom -->
+      <ellipse cx="150" cy="200" rx="76" ry="14" fill="#0d4e50"/>
+      <!-- Shade rim top -->
+      <ellipse cx="150" cy="70" rx="52" ry="10" fill="#0d4e50"/>
+      <!-- Glow effect -->
+      <ellipse cx="150" cy="210" rx="80" ry="28" fill="#FFCB9A" opacity="0.18"/>
+      <ellipse cx="150" cy="220" rx="55" ry="18" fill="#FFCB9A" opacity="0.12"/>
+      <!-- Stem -->
+      <rect x="143" y="200" width="14" height="130" fill="#D9B08C" rx="3"/>
+      <!-- Base -->
+      <ellipse cx="150" cy="340" rx="55" ry="15" fill="#D9B08C" opacity="0.4"/>
+      <ellipse cx="150" cy="335" rx="40" ry="12" fill="#D9B08C" opacity="0.6"/>
+      <ellipse cx="150" cy="328" rx="28" ry="9" fill="#D9B08C" opacity="0.85"/>
+      <!-- Decorative ring on stem -->
+      <ellipse cx="150" cy="270" rx="20" ry="6" fill="#116466" opacity="0.5"/>
+      <!-- Light rays -->
+      <line x1="150" y1="215" x2="90" y2="280" stroke="#FFCB9A" stroke-width="1" opacity="0.2"/>
+      <line x1="150" y1="215" x2="210" y2="280" stroke="#FFCB9A" stroke-width="1" opacity="0.2"/>
+      <line x1="150" y1="215" x2="60" y2="310" stroke="#FFCB9A" stroke-width="1" opacity="0.1"/>
+      <line x1="150" y1="215" x2="240" y2="310" stroke="#FFCB9A" stroke-width="1" opacity="0.1"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ════════════════════════════
+     SAVOIR-FAIRE
+════════════════════════════ -->
+<section class="features">
+  <div class="container">
+    <div class="section-title">
+      <span class="eyebrow">Mon engagement</span>
+      <h2>Un savoir-faire artisanal</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="features-grid">
+
+      <div class="feature-card reveal">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path d="M18.37 2.63 14 7l-1.59-1.59a2 2 0 0 0-2.82 0L8 7l9 9 1.59-1.59a2 2 0 0 0 0-2.82L17 10l4.37-4.37a2.12 2.12 0 0 0-3-3Z"/>
+            <path d="M9 8c-2 3-4 3.5-7 4l8 10c2-1 6-5 6-7"/>
+            <path d="M14.5 17.5 4.5 15"/>
+          </svg>
+        </div>
+        <h3>Fait à la main</h3>
+        <p>Chaque pièce est confectionnée dans mon atelier, de l'assemblage à la finition. Aucune lampe n'est identique.</p>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Z"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+        </div>
+        <h3>Matériaux naturels</h3>
+        <p>Rotin, bois flotté, céramique, lin, coton… Je privilégie les matières vivantes et durables.</p>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </div>
+        <h3>Avec amour</h3>
+        <p>Passionnée de lumière et de décoration, je mets tout mon cœur dans chaque création pour que vous l'aimiez autant que moi.</p>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <rect x="1" y="3" width="15" height="13" rx="1"/>
+            <path d="M16 8h4l3 3v5h-7V8Z"/><circle cx="5.5" cy="18.5" r="2.5"/>
+            <circle cx="18.5" cy="18.5" r="2.5"/>
+          </svg>
+        </div>
+        <h3>Livraison soignée</h3>
+        <p>Chaque lampe est emballée avec soin dans des matériaux recyclés pour arriver chez vous en parfait état.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════
+     FEATURED PRODUCTS
+════════════════════════════ -->
+<section style="background: var(--cream);">
+  <div class="container">
+    <div class="section-title">
+      <span class="eyebrow">Coups de cœur</span>
+      <h2>Nos créations vedettes</h2>
+      <div class="divider"></div>
+    </div>
+
+    <div id="featured-grid" class="products-grid" style="grid-template-columns: repeat(auto-fill, minmax(265px, 1fr)); max-width: 1100px; margin: 0 auto;"></div>
+
+    <div style="text-align:center; margin-top: 3rem;">
+      <a href="articles.html" class="btn btn-dark">Voir toute la boutique</a>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════
+     COLLECTIONS / CATEGORIES
+════════════════════════════ -->
+<section style="background: var(--dark); padding: 5rem 2.5rem;">
+  <div class="container">
+    <div class="section-title">
+      <span class="eyebrow" style="color: var(--beige);">Explorez</span>
+      <h2 style="color: var(--cream);">Nos collections</h2>
+      <div class="divider"></div>
+    </div>
+
+    <div class="categories-grid">
+
+      <a href="articles.html?cat=suspension" class="category-card reveal">
+        <div class="cat-bg ph-suspension" style="height:100%">
+          <svg width="80" height="100" fill="none" stroke="white" stroke-width="1.5" viewBox="0 0 60 80" opacity="0.3">
+            <line x1="30" y1="0" x2="30" y2="14" stroke-dasharray="3 3"/>
+            <path d="M8 48 L18 16 L42 16 L52 48 Z"/>
+            <ellipse cx="30" cy="50" rx="22" ry="6"/>
+          </svg>
+        </div>
+        <div class="cat-overlay">
+          <div class="cat-text">
+            <span class="cat-label">Collection</span>
+            <span class="cat-name">Suspensions</span>
+            <span class="cat-count">4 créations</span>
+          </div>
+        </div>
+        <div class="cat-arrow">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </div>
+      </a>
+
+      <a href="articles.html?cat=table" class="category-card reveal">
+        <div class="cat-bg ph-table" style="height:100%">
+          <svg width="80" height="100" fill="none" stroke="white" stroke-width="1.5" viewBox="0 0 60 80" opacity="0.3">
+            <path d="M15 42 L22 20 L38 20 L45 42 Z"/>
+            <rect x="28" y="42" width="4" height="22" rx="1"/>
+            <ellipse cx="30" cy="65" rx="14" ry="4"/>
+          </svg>
+        </div>
+        <div class="cat-overlay">
+          <div class="cat-text">
+            <span class="cat-label">Collection</span>
+            <span class="cat-name">Lampes de table</span>
+            <span class="cat-count">4 créations</span>
+          </div>
+        </div>
+        <div class="cat-arrow">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </div>
+      </a>
+
+      <a href="articles.html?cat=applique" class="category-card reveal">
+        <div class="cat-bg ph-applique" style="height:100%">
+          <svg width="80" height="100" fill="none" stroke="white" stroke-width="1.5" viewBox="0 0 60 80" opacity="0.3">
+            <rect x="4" y="28" width="10" height="22" rx="1"/>
+            <rect x="13" y="35" width="20" height="3" rx="1"/>
+            <path d="M30 22 L40 45 L55 50 L44 18 Z"/>
+          </svg>
+        </div>
+        <div class="cat-overlay">
+          <div class="cat-text">
+            <span class="cat-label">Collection</span>
+            <span class="cat-name">Appliques</span>
+            <span class="cat-count">2 créations</span>
+          </div>
+        </div>
+        <div class="cat-arrow">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════
+     CITATION
+════════════════════════════ -->
+<section style="background: var(--beige); padding: 4rem 2.5rem; text-align:center;">
+  <div class="container" style="max-width: 700px;">
+    <svg width="40" height="30" viewBox="0 0 40 30" fill="none" style="opacity:0.3; margin:0 auto 1.5rem; display:block">
+      <path d="M0 30V18C0 8.4 5.6 2.4 16.8 0l2.4 4C13.6 5.6 10.8 9.2 10 14H18V30H0ZM22 30V18C22 8.4 27.6 2.4 38.8 0l2.4 4C35.6 5.6 32.8 9.2 32 14H40V30H22Z" fill="#2C3531"/>
+    </svg>
+    <p style="font-family:'Playfair Display',serif; font-size:clamp(1.1rem,2.5vw,1.6rem); color:var(--dark); font-style:italic; line-height:1.6; margin-bottom:1.5rem;">
+      "La lumière n'est pas seulement fonctionnelle — elle crée une atmosphère, raconte une histoire, transforme un espace en foyer."
+    </p>
+    <span style="font-family:'Dancing Script',cursive; font-size:1.2rem; color:var(--teal);">— Nicky</span>
+  </div>
+</section>
+
+<!-- ════════════════════════════
+     FOOTER
+════════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-grid">
+
+      <div class="footer-brand">
+        <a href="index.html" class="logo" style="margin-bottom:1rem;">
+          <svg class="logo-icon" viewBox="0 0 44 44" fill="none">
+            <ellipse cx="22" cy="24" rx="14" ry="5" fill="currentColor" opacity="0.15"/>
+            <path d="M10 26 L16 10 L28 10 L34 26 Z" fill="currentColor" opacity="0.9"/>
+            <rect x="20.5" y="26" width="3" height="10" fill="currentColor" opacity="0.7" rx="1"/>
+            <ellipse cx="22" cy="37" rx="7" ry="2.2" fill="currentColor" opacity="0.6"/>
+          </svg>
+          <div class="logo-text">
+            <span class="brand">Les lampes</span>
+            <span class="sub">de Nicky</span>
+          </div>
+        </a>
+        <p>Des lampes artisanales uniques, conçues avec amour dans un petit atelier. Chaque pièce illumine votre intérieur d'une chaleur authentique.</p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Boutique</h4>
+        <ul>
+          <li><a href="articles.html">Toutes les lampes</a></li>
+          <li><a href="articles.html?cat=suspension">Suspensions</a></li>
+          <li><a href="articles.html?cat=table">Lampes de table</a></li>
+          <li><a href="articles.html?cat=applique">Appliques murales</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Informations</h4>
+        <ul>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="#">Livraison & retours</a></li>
+          <li><a href="#">Entretien des lampes</a></li>
+          <li><a href="#">Commande sur mesure</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Légal</h4>
+        <ul>
+          <li><a href="#">Mentions légales</a></li>
+          <li><a href="#">CGV</a></li>
+          <li><a href="#">Confidentialité</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2025 Les Lampes de Nicky · Tous droits réservés</span>
+      <span>Fait avec amour dans mon atelier</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

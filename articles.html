@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boutique — Les Lampes de Nicky</title>
+  <meta name="description" content="Découvrez toutes nos lampes artisanales : suspensions, lampes de table et appliques murales faites main.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <script>(function(){var t=localStorage.getItem("nicky_theme");if(t==="dark")document.documentElement.setAttribute("data-theme","dark");}());</script>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a href="index.html" class="logo">
+    <svg class="logo-icon" viewBox="0 0 44 44" fill="none">
+      <ellipse cx="22" cy="24" rx="14" ry="5" fill="currentColor" opacity="0.15"/>
+      <path d="M10 26 L16 10 L28 10 L34 26 Z" fill="currentColor" opacity="0.9"/>
+      <rect x="20.5" y="26" width="3" height="10" fill="currentColor" opacity="0.7" rx="1"/>
+      <ellipse cx="22" cy="37" rx="7" ry="2.2" fill="currentColor" opacity="0.6"/>
+    </svg>
+    <div class="logo-text">
+      <span class="brand">Les lampes</span>
+      <span class="sub">de Nicky</span>
+    </div>
+  </a>
+  <nav>
+    <a href="index.html">Accueil</a>
+    <a href="articles.html" class="active">Boutique</a>
+    <a href="contact.html">Contact</a>
+      <button class="theme-toggle" id="theme-toggle" aria-label="Mode sombre/clair">
+        <svg class="icon-moon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="icon-sun"  width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+    <a href="checkout.html" class="nav-cart">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>
+        <path d="M16 10a4 4 0 01-8 0"/>
+      </svg>
+      Panier
+      <span class="cart-count" style="display:none">0</span>
+    </a>
+  </nav>
+</header>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <span class="eyebrow">Toutes mes créations</span>
+  <h1>La Boutique</h1>
+  <p>10 lampes artisanales, chacune unique, faites à la main avec des matériaux naturels</p>
+</div>
+
+<!-- BOUTIQUE -->
+<section style="background: var(--cream);">
+  <div class="container">
+
+    <!-- Filters -->
+    <div class="filters-bar">
+      <button class="filter-btn active" data-filter="all">Toutes (10)</button>
+      <button class="filter-btn" data-filter="suspension">Suspensions (4)</button>
+      <button class="filter-btn" data-filter="table">Lampes de table (4)</button>
+      <button class="filter-btn" data-filter="applique">Appliques (2)</button>
+    </div>
+
+    <!-- Grid -->
+    <div id="products-grid" class="products-grid"></div>
+  </div>
+</section>
+
+<!-- COMMANDE SUR MESURE -->
+<section style="background: var(--teal); padding: 4rem 2.5rem; text-align:center;">
+  <div class="container" style="max-width:650px;">
+    <span style="font-family:'Dancing Script',cursive; font-size:1.4rem; color:var(--peach); display:block; margin-bottom:0.5rem;">Une idée en tête ?</span>
+    <h2 style="font-family:'Playfair Display',serif; font-size:2rem; color:white; margin-bottom:1rem;">Commande sur mesure</h2>
+    <p style="color:var(--mint); font-weight:300; margin-bottom:2rem; line-height:1.7;">
+      Vous avez une vision précise ? Couleur, taille, matière particulière… Je peux créer la lampe de vos rêves, rien que pour vous.
+    </p>
+    <a href="contact.html" class="btn btn-light">Me parler de votre projet</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="logo">
+          <svg class="logo-icon" viewBox="0 0 44 44" fill="none">
+            <ellipse cx="22" cy="24" rx="14" ry="5" fill="currentColor" opacity="0.15"/>
+            <path d="M10 26 L16 10 L28 10 L34 26 Z" fill="currentColor" opacity="0.9"/>
+            <rect x="20.5" y="26" width="3" height="10" fill="currentColor" opacity="0.7" rx="1"/>
+            <ellipse cx="22" cy="37" rx="7" ry="2.2" fill="currentColor" opacity="0.6"/>
+          </svg>
+          <div class="logo-text">
+            <span class="brand">Les lampes</span>
+            <span class="sub">de Nicky</span>
+          </div>
+        </a>
+        <p>Des lampes artisanales uniques, conçues avec amour dans un petit atelier.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Boutique</h4>
+        <ul>
+          <li><a href="articles.html">Toutes les lampes</a></li>
+          <li><a href="articles.html?cat=suspension">Suspensions</a></li>
+          <li><a href="articles.html?cat=table">Lampes de table</a></li>
+          <li><a href="articles.html?cat=applique">Appliques murales</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Informations</h4>
+        <ul>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="#">Livraison & retours</a></li>
+          <li><a href="#">Commande sur mesure</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Légal</h4>
+        <ul>
+          <li><a href="#">Mentions légales</a></li>
+          <li><a href="#">CGV</a></li>
+          <li><a href="#">Confidentialité</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 Les Lampes de Nicky · Tous droits réservés</span>
+      <span>Fait avec amour dans mon atelier</span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+  // Pre-filter from URL param
+  const params = new URLSearchParams(window.location.search);
+  const cat = params.get('cat');
+  if (cat) {
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.querySelector(`.filter-btn[data-filter="${cat}"]`);
+      if (btn) btn.click();
+    });
+  }
+</script>
+</body>
+</html>
