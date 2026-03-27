@@ -63,9 +63,10 @@ function getLampsAsync(cb) {
 
 function renderCard(lamp) {
   const firstImg = (lamp.images && lamp.images.length) ? lamp.images[0] : lamp.image;
+  const cat = lamp.category || 'suspension';
   const ph = firstImg
-    ? `<img src="${firstImg}" alt="${lamp.name}" style="width:100%;height:100%;object-fit:cover">`
-    : `<div class="img-placeholder ph-${lamp.category}">${LAMP_SVG[lamp.category] || ''}</div>`;
+    ? `<img src="${firstImg}" alt="${lamp.name}" class="product-photo" data-cat="${cat}" style="width:100%;height:100%;object-fit:cover">`
+    : `<div class="img-placeholder ph-${cat}">${LAMP_SVG[cat] || ''}</div>`;
   return `
   <div class="product-card reveal" data-id="${lamp.id}" data-name="${lamp.name.replace(/"/g, '&quot;')}" data-price="${lamp.price}" data-category="${lamp.category}">
     <div class="product-image">
@@ -542,11 +543,78 @@ function initThemeToggle() {
     if (isDark) {
       document.documentElement.removeAttribute('data-theme');
       localStorage.setItem('nicky_theme', 'light');
+      removeFireflies();
     } else {
       document.documentElement.setAttribute('data-theme', 'dark');
       localStorage.setItem('nicky_theme', 'dark');
+      // Relancer l'animation de la lampe (re-trigger CSS animations)
+      const lamp = document.querySelector('.hero-lamp-svg');
+      if (lamp) {
+        lamp.querySelectorAll('.lamp-bulb,.lamp-inner-glow,.lamp-cone,.lamp-floor,.lamp-ray').forEach(el => {
+          el.style.animation = 'none';
+          el.offsetHeight; // reflow
+          el.style.animation = '';
+        });
+      }
+      setTimeout(initFireflies, 1200);
+      hideDarkTeaser();
     }
   });
+}
+
+// ── LUCIOLES ─────────────────────────────────────────
+function initFireflies() {
+  removeFireflies();
+  if (document.documentElement.getAttribute('data-theme') !== 'dark') return;
+  const count = 16;
+  for (let i = 0; i < count; i++) {
+    const ff = document.createElement('div');
+    ff.className = 'nicky-firefly';
+    const size = 3 + Math.random() * 5;
+    const dur  = 7 + Math.random() * 9;
+    const del  = Math.random() * 8;
+    const op   = 0.35 + Math.random() * 0.5;
+    const dx   = (Math.random() - 0.5) * 100;
+    const dy   = -(60 + Math.random() * 120);
+    const dx2  = (Math.random() - 0.5) * 80;
+    const dy2  = -(140 + Math.random() * 100);
+    ff.style.cssText = `
+      left:${5 + Math.random() * 90}%;
+      top:${15 + Math.random() * 75}%;
+      width:${size}px; height:${size}px;
+      background:radial-gradient(circle,#FFDE9A 0%,#FFCB9A 40%,transparent 75%);
+      --ff-dur:${dur}s; --ff-delay:${del}s; --ff-op:${op};
+      --ff-dx:${dx}px;  --ff-dy:${dy}px;
+      --ff-dx2:${dx2}px; --ff-dy2:${dy2}px;
+    `;
+    document.body.appendChild(ff);
+  }
+}
+
+function removeFireflies() {
+  document.querySelectorAll('.nicky-firefly').forEach(f => f.remove());
+}
+
+// ── TEASER MODE SOMBRE ───────────────────────────────
+function initDarkTeaser() {
+  const teaser = document.getElementById('dark-teaser');
+  if (!teaser) return;
+  // Ne montrer que si le mode sombre n'a jamais été activé
+  if (localStorage.getItem('nicky_theme') === 'dark') return;
+  if (localStorage.getItem('nicky_teaser_seen')) return;
+  if (document.documentElement.getAttribute('data-theme') === 'dark') return;
+
+  setTimeout(() => { teaser.classList.add('visible'); }, 2000);
+  setTimeout(() => { hideDarkTeaser(); }, 14000);
+}
+
+function hideDarkTeaser() {
+  const teaser = document.getElementById('dark-teaser');
+  if (!teaser) return;
+  teaser.classList.remove('visible');
+  teaser.classList.add('hiding');
+  localStorage.setItem('nicky_teaser_seen', '1');
+  setTimeout(() => teaser.remove(), 400);
 }
 
 // ── PRODUCT DETAIL MODAL ──────────────────────────────
@@ -909,6 +977,14 @@ function initThemeToggle() {
 
 // ── INIT ──────────────────────────────────────────────
 
+// Fix images cassées → fallback SVG placeholder
+document.addEventListener('error', function(e) {
+  if (e.target.tagName === 'IMG' && e.target.classList.contains('product-photo')) {
+    const cat = e.target.dataset.cat || 'suspension';
+    e.target.parentElement.innerHTML = `<div class="img-placeholder ph-${cat}">${LAMP_SVG[cat] || ''}</div>`;
+  }
+}, true);
+
 document.addEventListener('DOMContentLoaded', () => {
   initGrain();
   initCursorGlow();
@@ -931,4 +1007,10 @@ document.addEventListener('DOMContentLoaded', () => {
   initThemeToggle();
   initParallax();
   initHeroText();
+  initDarkTeaser();
+
+  // Lucioles si déjà en mode sombre au chargement
+  if (document.documentElement.getAttribute('data-theme') === 'dark') {
+    setTimeout(initFireflies, 800);
+  }
 });

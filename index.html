@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Les Lampes de Nicky — Lumières artisanales faites main</title>
   <meta name="description" content="Lampes artisanales faites main par Nicky. Suspensions, lampes de table et appliques murales uniques, créées avec des matériaux naturels.">
-  <link rel="stylesheet" href="css/style.css?v=3">
+  <link rel="stylesheet" href="css/style.css?v=4">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <script>(function(){var t=localStorage.getItem("nicky_theme");if(t==="dark")document.documentElement.setAttribute("data-theme","dark");}());</script>
 </head>
@@ -41,10 +41,17 @@
     <a href="index.html" class="active">Accueil</a>
     <a href="articles.html">Boutique</a>
     <a href="contact.html">Contact</a>
-      <button class="theme-toggle" id="theme-toggle" aria-label="Mode sombre/clair">
-        <svg class="icon-moon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        <svg class="icon-sun"  width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-      </button>
+      <div class="dark-teaser-wrap">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Mode sombre/clair">
+          <svg class="icon-moon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="icon-sun"  width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+        <div class="dark-teaser" id="dark-teaser">
+          <span class="dark-teaser-star">✦</span>
+          <span>Mode nuit</span>
+          <span class="dark-teaser-arrow">↑</span>
+        </div>
+      </div>
     <a href="checkout.html" class="nav-cart">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
         <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>
@@ -77,34 +84,60 @@
   </div>
 
   <div class="hero-visual">
-    <!-- Decorative lamp illustration -->
+    <!-- Lampe suspendue — s'allume en mode sombre -->
     <svg class="hero-lamp-svg" viewBox="0 0 300 420" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Cord -->
-      <line x1="150" y1="0" x2="150" y2="60" stroke="#D9B08C" stroke-width="2.5" stroke-dasharray="4 4"/>
-      <!-- Lampshade outer -->
-      <path d="M75 200 L100 70 L200 70 L225 200 Z" fill="#116466" opacity="0.9"/>
-      <!-- Lampshade inner highlight -->
-      <path d="M95 190 L115 85 L185 85 L205 190 Z" fill="white" opacity="0.06"/>
-      <!-- Shade rim bottom -->
-      <ellipse cx="150" cy="200" rx="76" ry="14" fill="#0d4e50"/>
-      <!-- Shade rim top -->
-      <ellipse cx="150" cy="70" rx="52" ry="10" fill="#0d4e50"/>
-      <!-- Glow effect -->
-      <ellipse cx="150" cy="210" rx="80" ry="28" fill="#FFCB9A" opacity="0.18"/>
-      <ellipse cx="150" cy="220" rx="55" ry="18" fill="#FFCB9A" opacity="0.12"/>
-      <!-- Stem -->
-      <rect x="143" y="200" width="14" height="130" fill="#D9B08C" rx="3"/>
-      <!-- Base -->
-      <ellipse cx="150" cy="340" rx="55" ry="15" fill="#D9B08C" opacity="0.4"/>
-      <ellipse cx="150" cy="335" rx="40" ry="12" fill="#D9B08C" opacity="0.6"/>
-      <ellipse cx="150" cy="328" rx="28" ry="9" fill="#D9B08C" opacity="0.85"/>
-      <!-- Decorative ring on stem -->
-      <ellipse cx="150" cy="270" rx="20" ry="6" fill="#116466" opacity="0.5"/>
-      <!-- Light rays -->
-      <line x1="150" y1="215" x2="90" y2="280" stroke="#FFCB9A" stroke-width="1" opacity="0.2"/>
-      <line x1="150" y1="215" x2="210" y2="280" stroke="#FFCB9A" stroke-width="1" opacity="0.2"/>
-      <line x1="150" y1="215" x2="60" y2="310" stroke="#FFCB9A" stroke-width="1" opacity="0.1"/>
-      <line x1="150" y1="215" x2="240" y2="310" stroke="#FFCB9A" stroke-width="1" opacity="0.1"/>
+      <defs>
+        <radialGradient id="coneGrad" cx="50%" cy="0%" r="90%" gradientUnits="objectBoundingBox">
+          <stop offset="0%"   stop-color="#FFCB9A" stop-opacity="0.55"/>
+          <stop offset="55%"  stop-color="#FFB060" stop-opacity="0.12"/>
+          <stop offset="100%" stop-color="#FFCB9A" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="floorGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stop-color="#FFCB9A" stop-opacity="0.65"/>
+          <stop offset="100%" stop-color="#FFCB9A" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="bulbGrad" cx="50%" cy="60%" r="55%">
+          <stop offset="0%"   stop-color="white"   stop-opacity="1"/>
+          <stop offset="40%"  stop-color="#FFDE9A" stop-opacity="0.9"/>
+          <stop offset="100%" stop-color="#FFCB9A" stop-opacity="0.4"/>
+        </radialGradient>
+      </defs>
+
+      <!-- Fixation plafond -->
+      <rect x="128" y="0" width="44" height="14" rx="5" fill="#C8A87A" opacity="0.75"/>
+      <!-- Câble -->
+      <line x1="150" y1="14" x2="150" y2="82" stroke="#C8A87A" stroke-width="2.5"/>
+      <!-- Douille -->
+      <ellipse cx="150" cy="86" rx="15" ry="8" fill="#B89060" opacity="0.9"/>
+      <rect x="139" y="78" width="22" height="12" rx="4" fill="#C8A87A" opacity="0.85"/>
+
+      <!-- Abat-jour (suspension évasée vers le bas) -->
+      <path d="M112 86 L42 218 L258 218 L188 86 Z" fill="#116466" opacity="0.95"/>
+      <!-- Reflet interne -->
+      <path d="M124 86 L68 208 L232 208 L176 86 Z" fill="white" opacity="0.042"/>
+      <!-- Rim bas -->
+      <ellipse cx="150" cy="218" rx="108" ry="16" fill="#0a3d3f"/>
+      <!-- Rim haut -->
+      <ellipse cx="150" cy="86"  rx="38"  ry="10" fill="#0a3d3f"/>
+
+      <!-- Ampoule (glow) — s'allume en mode sombre -->
+      <ellipse cx="150" cy="152" rx="28" ry="36" fill="url(#bulbGrad)" class="lamp-bulb"/>
+      <ellipse cx="150" cy="148" rx="16" ry="20" fill="white"           class="lamp-bulb" opacity="0"/>
+
+      <!-- Halo chaud sous l'abat-jour -->
+      <ellipse cx="150" cy="213" rx="90" ry="14" fill="#FFB040" class="lamp-inner-glow"/>
+
+      <!-- Cône de lumière -->
+      <path d="M42 222 L-55 410 L355 410 L258 222 Z" fill="url(#coneGrad)" class="lamp-cone"/>
+
+      <!-- Halos de lumière rayonnante -->
+      <line x1="150" y1="225" x2="55"  y2="390" stroke="#FFCB9A" stroke-width="1.5" class="lamp-ray"/>
+      <line x1="150" y1="225" x2="245" y2="390" stroke="#FFCB9A" stroke-width="1.5" class="lamp-ray"/>
+      <line x1="150" y1="225" x2="10"  y2="410" stroke="#FFCB9A" stroke-width="1"   class="lamp-ray"/>
+      <line x1="150" y1="225" x2="290" y2="410" stroke="#FFCB9A" stroke-width="1"   class="lamp-ray"/>
+
+      <!-- Pool de lumière au sol -->
+      <ellipse cx="150" cy="405" rx="145" ry="20" fill="url(#floorGrad)" class="lamp-floor"/>
     </svg>
   </div>
 </section>
@@ -343,7 +376,7 @@
 
     <div class="footer-bottom">
       <span>© 2025 Les Lampes de Nicky · Tous droits réservés</span>
-      <span>Fait avec amour dans mon atelier</span>
+      <span>Fait avec amour · Site créé par <a href="https://www.14level-up.ch" target="_blank" rel="noopener">14LevelUp</a></span>
     </div>
   </div>
 </footer>
