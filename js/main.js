@@ -549,6 +549,360 @@ function initThemeToggle() {
   });
 }
 
+// ── PRODUCT DETAIL MODAL ──────────────────────────────
+
+(function() {
+  'use strict';
+
+  // ── State ────────────────────────────────────────────
+  let _overlay = null, _lightbox = null;
+  let _currentImages = [], _currentIdx = 0;
+  let _currentLamp = null;
+
+  // ── Build DOM (once) ─────────────────────────────────
+  function _buildModal() {
+    if (_overlay) return;
+
+    _overlay = document.createElement('div');
+    _overlay.className = 'pdm-overlay';
+    _overlay.setAttribute('role', 'dialog');
+    _overlay.setAttribute('aria-modal', 'true');
+    _overlay.innerHTML = `
+      <div class="pdm-dialog" id="pdm-dialog">
+        <button class="pdm-close" id="pdm-close" aria-label="Fermer">✕</button>
+
+        <!-- Gallery -->
+        <div class="pdm-gallery" id="pdm-gallery">
+          <div class="pdm-main-wrap" id="pdm-main-wrap">
+            <button class="pdm-arrow pdm-arrow-prev" id="pdm-prev" aria-label="Photo précédente">&#8592;</button>
+            <button class="pdm-arrow pdm-arrow-next" id="pdm-next" aria-label="Photo suivante">&#8594;</button>
+          </div>
+          <div class="pdm-thumbs" id="pdm-thumbs"></div>
+        </div>
+
+        <!-- Info -->
+        <div class="pdm-info" id="pdm-info">
+          <div class="pdm-category" id="pdm-cat"></div>
+          <h2 class="pdm-name" id="pdm-name"></h2>
+          <div class="pdm-badge" id="pdm-badge" style="display:none"></div>
+          <p class="pdm-desc" id="pdm-desc"></p>
+          <p class="pdm-comment" id="pdm-comment" style="display:none"></p>
+          <div class="pdm-price-row">
+            <span class="pdm-price" id="pdm-price"></span>
+            <span class="pdm-price-currency">CHF</span>
+          </div>
+          <div class="pdm-actions">
+            <button class="pdm-btn-cart" id="pdm-btn-cart">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>
+                <path d="M16 10a4 4 0 01-8 0"/>
+              </svg>
+              Ajouter au panier
+            </button>
+            <button class="pdm-btn-question" id="pdm-btn-question">Poser une question</button>
+
+            <form class="pdm-question-form" id="pdm-qform" novalidate>
+              <label for="pdm-qname">Votre prénom</label>
+              <input type="text" id="pdm-qname" placeholder="Marie" required>
+              <label for="pdm-qemail">Email</label>
+              <input type="email" id="pdm-qemail" placeholder="marie@email.com" required>
+              <label for="pdm-qmsg">Message</label>
+              <textarea id="pdm-qmsg" required></textarea>
+              <button type="submit" class="pdm-btn-send">Envoyer le message</button>
+            </form>
+            <div class="pdm-sent-msg" id="pdm-sent">Message envoyé !</div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(_overlay);
+
+    // Lightbox
+    _lightbox = document.createElement('div');
+    _lightbox.className = 'pdm-lightbox';
+    _lightbox.innerHTML = `
+      <button class="pdm-lightbox-close" aria-label="Fermer le zoom">✕</button>
+      <img id="pdm-lb-img" src="" alt="">
+    `;
+    document.body.appendChild(_lightbox);
+
+    _bindEvents();
+  }
+
+  // ── Helpers ──────────────────────────────────────────
+  function _catLabel(c) { return {suspension:'Suspension',table:'Lampe de table',applique:'Applique murale'}[c] || c; }
+
+  function _getImages(lamp) {
+    if (lamp.images && lamp.images.length) return lamp.images;
+    if (lamp.image) return [lamp.image];
+    return [];
+  }
+
+  // ── Render gallery ───────────────────────────────────
+  function _renderGallery(images, idx, category) {
+    const wrap = document.getElementById('pdm-main-wrap');
+    const thumbsEl = document.getElementById('pdm-thumbs');
+
+    // Main display
+    // keep buttons, replace content node
+    const existing = wrap.querySelector('.pdm-main-img, .pdm-main-ph');
+    if (existing) existing.remove();
+
+    if (images.length > 0) {
+      const img = document.createElement('img');
+      img.className = 'pdm-main-img';
+      img.src = images[idx];
+      img.alt = _currentLamp ? _currentLamp.name : '';
+      wrap.appendChild(img);
+    } else {
+      const ph = document.createElement('div');
+      ph.className = `pdm-main-ph ph-${category}`;
+      ph.innerHTML = LAMP_SVG[category] || '';
+      wrap.appendChild(ph);
+    }
+
+    // Arrows
+    const prev = document.getElementById('pdm-prev');
+    const next = document.getElementById('pdm-next');
+    if (images.length <= 1) {
+      prev.style.display = 'none';
+      next.style.display = 'none';
+    } else {
+      prev.style.display = '';
+      next.style.display = '';
+      prev.disabled = false;
+      next.disabled = false;
+    }
+
+    // Thumbnails
+    if (images.length <= 1) {
+      thumbsEl.innerHTML = '';
+    } else {
+      thumbsEl.innerHTML = images.map((src, i) =>
+        `<div class="pdm-thumb${i === idx ? ' active' : ''}" data-idx="${i}">
+          <img src="${src}" alt="">
+        </div>`
+      ).join('');
+    }
+  }
+
+  function _goToPhoto(idx) {
+    _currentIdx = Math.max(0, Math.min(idx, _currentImages.length - 1));
+    _renderGallery(_currentImages, _currentIdx, _currentLamp ? _currentLamp.category : 'suspension');
+  }
+
+  // ── Open modal ───────────────────────────────────────
+  function openProductModal(lamp) {
+    _buildModal();
+    _currentLamp = lamp;
+    _currentImages = _getImages(lamp);
+    _currentIdx = 0;
+
+    // Populate info
+    document.getElementById('pdm-cat').textContent = _catLabel(lamp.category);
+    document.getElementById('pdm-name').textContent = lamp.name;
+
+    const badgeEl = document.getElementById('pdm-badge');
+    if (lamp.badge) {
+      badgeEl.textContent = lamp.badge;
+      badgeEl.className = 'pdm-badge' + (lamp.badgeNew ? ' new' : '');
+      badgeEl.style.display = '';
+    } else {
+      badgeEl.style.display = 'none';
+    }
+
+    document.getElementById('pdm-desc').textContent = lamp.desc || '';
+
+    const commentEl = document.getElementById('pdm-comment');
+    if (lamp.comment) {
+      commentEl.textContent = '\u201c' + lamp.comment + '\u201d';
+      commentEl.style.display = '';
+    } else {
+      commentEl.style.display = 'none';
+    }
+
+    document.getElementById('pdm-price').textContent = lamp.price;
+
+    // Reset cart button
+    const cartBtn = document.getElementById('pdm-btn-cart');
+    cartBtn.textContent = '';
+    cartBtn.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg> Ajouter au panier`;
+    cartBtn.classList.remove('added');
+    cartBtn.dataset.id = lamp.id;
+    cartBtn.dataset.name = lamp.name;
+    cartBtn.dataset.price = lamp.price;
+    cartBtn.dataset.category = lamp.category;
+
+    // Reset question form
+    const qform = document.getElementById('pdm-qform');
+    qform.classList.remove('open');
+    qform.reset();
+    document.getElementById('pdm-sent').classList.remove('visible');
+    document.getElementById('pdm-btn-question').textContent = 'Poser une question';
+    document.getElementById('pdm-qmsg').value = `Bonjour, j\u2019ai une question sur la lampe \u00ab\u00a0${lamp.name}\u00a0\u00bb.`;
+
+    // Render gallery
+    _renderGallery(_currentImages, 0, lamp.category);
+
+    // Open
+    _overlay.classList.add('pdm-open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  // ── Close modal ──────────────────────────────────────
+  function closeProductModal() {
+    if (!_overlay) return;
+    _overlay.classList.remove('pdm-open');
+    document.body.style.overflow = '';
+    closeLightbox();
+  }
+
+  // ── Lightbox ─────────────────────────────────────────
+  function openLightbox(src) {
+    if (!src || !_lightbox) return;
+    document.getElementById('pdm-lb-img').src = src;
+    _lightbox.classList.add('open');
+  }
+
+  function closeLightbox() {
+    if (!_lightbox) return;
+    _lightbox.classList.remove('open');
+  }
+
+  // ── Event binding ────────────────────────────────────
+  function _bindEvents() {
+    // Close button
+    document.getElementById('pdm-close').addEventListener('click', closeProductModal);
+
+    // Overlay click outside dialog
+    _overlay.addEventListener('click', function(e) {
+      if (e.target === _overlay) closeProductModal();
+    });
+
+    // Keyboard
+    document.addEventListener('keydown', function(e) {
+      if (!_overlay || !_overlay.classList.contains('pdm-open')) return;
+      if (e.key === 'Escape') {
+        if (_lightbox && _lightbox.classList.contains('open')) {
+          closeLightbox();
+        } else {
+          closeProductModal();
+        }
+      }
+      if (e.key === 'ArrowLeft' && _currentImages.length > 1) _goToPhoto(_currentIdx - 1);
+      if (e.key === 'ArrowRight' && _currentImages.length > 1) _goToPhoto(_currentIdx + 1);
+    });
+
+    // Arrow buttons
+    document.getElementById('pdm-prev').addEventListener('click', function(e) {
+      e.stopPropagation();
+      _goToPhoto(_currentIdx - 1);
+    });
+    document.getElementById('pdm-next').addEventListener('click', function(e) {
+      e.stopPropagation();
+      _goToPhoto(_currentIdx + 1);
+    });
+
+    // Thumbnail clicks (delegated)
+    document.getElementById('pdm-thumbs').addEventListener('click', function(e) {
+      const thumb = e.target.closest('.pdm-thumb');
+      if (!thumb) return;
+      _goToPhoto(parseInt(thumb.dataset.idx));
+    });
+
+    // Main image zoom click
+    document.getElementById('pdm-main-wrap').addEventListener('click', function(e) {
+      if (e.target.closest('.pdm-arrow')) return;
+      const src = _currentImages[_currentIdx];
+      if (src) openLightbox(src);
+    });
+
+    // Lightbox close
+    _lightbox.querySelector('.pdm-lightbox-close').addEventListener('click', closeLightbox);
+    _lightbox.addEventListener('click', function(e) {
+      if (e.target === _lightbox || e.target === _lightbox.querySelector('img')) closeLightbox();
+    });
+
+    // Add to cart
+    document.getElementById('pdm-btn-cart').addEventListener('click', function() {
+      const btn = this;
+      const id       = btn.dataset.id;
+      const name     = btn.dataset.name;
+      const price    = parseFloat(btn.dataset.price);
+      const category = btn.dataset.category || '';
+      addToCart(id, name, price, category);
+      burstCart(btn);
+      btn.innerHTML = '&#10003; Ajoutée au panier';
+      btn.classList.add('added');
+      setTimeout(() => {
+        btn.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg> Ajouter au panier`;
+        btn.classList.remove('added');
+      }, 2500);
+    });
+
+    // Toggle question form
+    document.getElementById('pdm-btn-question').addEventListener('click', function() {
+      const qform = document.getElementById('pdm-qform');
+      const isOpen = qform.classList.toggle('open');
+      this.textContent = isOpen ? 'Annuler' : 'Poser une question';
+      if (isOpen) {
+        const sentMsg = document.getElementById('pdm-sent');
+        sentMsg.classList.remove('visible');
+      }
+    });
+
+    // Submit question form
+    document.getElementById('pdm-qform').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name    = document.getElementById('pdm-qname').value.trim();
+      const email   = document.getElementById('pdm-qemail').value.trim();
+      const message = document.getElementById('pdm-qmsg').value.trim();
+      if (!name || !email || !message) return;
+
+      const subject = encodeURIComponent('Question sur : ' + (_currentLamp ? _currentLamp.name : ''));
+      const body    = encodeURIComponent(`Nom : ${name}\nEmail : ${email}\n\n${message}`);
+      const mailto  = `mailto:nicky@lampes-de-nicky.ch?subject=${subject}&body=${body}`;
+
+      // Try to open mailto, then show confirmation
+      const a = document.createElement('a');
+      a.href = mailto;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      this.classList.remove('open');
+      document.getElementById('pdm-btn-question').textContent = 'Poser une question';
+      document.getElementById('pdm-sent').classList.add('visible');
+    });
+  }
+
+  // ── Init card click handlers ─────────────────────────
+  function initProductCardClicks() {
+    document.addEventListener('click', function(e) {
+      const card = e.target.closest('.product-card[data-id]');
+      if (!card) return;
+
+      // Let add-to-cart button work normally without opening modal
+      if (e.target.closest('.add-to-cart')) return;
+
+      const id = card.dataset.id;
+      getLampsAsync(function(lamps) {
+        const lamp = lamps.find(l => l.id === id);
+        if (lamp) openProductModal(lamp);
+      });
+    });
+  }
+
+  // ── Expose & auto-init ───────────────────────────────
+  window.openProductModal  = openProductModal;
+  window.closeProductModal = closeProductModal;
+
+  document.addEventListener('DOMContentLoaded', initProductCardClicks);
+
+})();
+
 // ── INIT ──────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
