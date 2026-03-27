@@ -670,10 +670,34 @@
       border-radius: 8px;
       overflow: hidden;
       box-shadow: 0 1px 6px rgba(0,0,0,0.12);
+      cursor: grab;
+      transition: opacity 0.2s, transform 0.15s;
     }
+    .photo-thumb.dragging { opacity: 0.4; transform: scale(0.95); cursor: grabbing; }
+    .photo-thumb.drag-over { box-shadow: 0 0 0 3px var(--teal); }
     .photo-thumb img {
-      width: 100%; height: 100%; object-fit: cover;
+      width: 100%; height: 100%; object-fit: cover; pointer-events: none;
     }
+    .photo-thumb-arrows {
+      position: absolute;
+      bottom: 2px; left: 0; right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 2px;
+    }
+    .photo-thumb-arrow {
+      background: rgba(0,0,0,0.55);
+      color: white;
+      border: none;
+      border-radius: 3px;
+      width: 18px; height: 16px;
+      font-size: 10px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .photo-thumb-arrow:hover { background: var(--teal); }
     .photo-thumb-remove {
       position: absolute;
       top: 3px; right: 3px;
@@ -903,10 +927,78 @@
 
   const STORAGE_KEY = 'nicky_lamps';
   const PASSWORD    = 'nicky2025';
+  const DB_NAME     = 'nickyDB';
+  const DB_VERSION  = 1;
+  const STORE_NAME  = 'lamps';
 
   let lamps = [];
   let editingId = null;
   let currentImages = [];
+  let db = null;
+
+  /* ─── IndexedDB init ─── */
+  function openDB(cb) {
+    if (db) { cb(db); return; }
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = function(e) {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains(STORE_NAME)) {
+        d.createObjectStore(STORE_NAME, { keyPath: 'id' });
+      }
+    };
+    req.onsuccess = function(e) { db = e.target.result; cb(db); };
+    req.onerror   = function() {
+      // Fallback to localStorage if IndexedDB fails
+      cb(null);
+    };
+  }
+
+  function saveAllToDB(lampsArray, cb) {
+    openDB(function(d) {
+      if (!d) {
+        // fallback
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(lampsArray)); } catch(e) {}
+        if (cb) cb();
+        return;
+      }
+      const tx = d.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      store.clear();
+      lampsArray.forEach(l => store.put(l));
+      tx.oncomplete = function() { if (cb) cb(); };
+      tx.onerror    = function() { if (cb) cb(); };
+    });
+  }
+
+  function loadAllFromDB(cb) {
+    openDB(function(d) {
+      if (!d) {
+        // fallback to localStorage
+        const stored = localStorage.getItem(STORAGE_KEY);
+        let arr = DEFAULT_LAMPS;
+        if (stored) { try { arr = JSON.parse(stored); } catch(e) {} }
+        cb(arr);
+        return;
+      }
+      const tx    = d.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const req   = store.getAll();
+      req.onsuccess = function(e) {
+        const arr = e.target.result;
+        if (!arr || arr.length === 0) {
+          // First time: migrate from localStorage if data exists
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored) {
+            try { cb(JSON.parse(stored)); return; } catch(e) {}
+          }
+          cb([...DEFAULT_LAMPS]);
+        } else {
+          cb(arr);
+        }
+      };
+      req.onerror = function() { cb([...DEFAULT_LAMPS]); };
+    });
+  }
 
   /* ─── Auth ─── */
   document.getElementById('login-form').addEventListener('submit', function(e) {
@@ -916,7 +1008,6 @@
       document.getElementById('login-screen').style.display = 'none';
       document.getElementById('admin-panel').style.display = 'block';
       loadLamps();
-      renderGrid();
     } else {
       const err = document.getElementById('login-error');
       err.classList.add('show');
@@ -928,16 +1019,14 @@
 
   /* ─── Data helpers ─── */
   function loadLamps() {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try { lamps = JSON.parse(stored); } catch(e) { lamps = [...DEFAULT_LAMPS]; }
-    } else {
-      lamps = [...DEFAULT_LAMPS];
-    }
+    loadAllFromDB(function(arr) {
+      lamps = arr;
+      renderGrid();
+    });
   }
 
-  function saveLamps() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(lamps));
+  function saveLamps(cb) {
+    saveAllToDB(lamps, cb);
   }
 
   function nextId() {
@@ -1061,14 +1150,29 @@
   }
 
   /* ─── Photo handling ─── */
+  function compressImage(dataUrl, maxW, quality, cb) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      cb(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = dataUrl;
+  }
+
   function handlePhotos(input) {
     const files = Array.from(input.files);
     files.forEach(file => {
       const reader = new FileReader();
       reader.onload = function(e) {
-        currentImages.push(e.target.result);
-        renderThumbs();
-        updatePreview();
+        compressImage(e.target.result, 800, 0.7, function(compressed) {
+          currentImages.push(compressed);
+          renderThumbs();
+          updatePreview();
+        });
       };
       reader.readAsDataURL(file);
     });
@@ -1081,16 +1185,59 @@
     updatePreview();
   }
 
+  function movePhoto(idx, dir) {
+    const newIdx = idx + dir;
+    if (newIdx < 0 || newIdx >= currentImages.length) return;
+    const tmp = currentImages[idx];
+    currentImages[idx] = currentImages[newIdx];
+    currentImages[newIdx] = tmp;
+    renderThumbs();
+    updatePreview();
+  }
+
+  let dragSrcIdx = null;
+
   function renderThumbs() {
     const el = document.getElementById('photo-thumbs');
     if (!currentImages.length) { el.innerHTML = ''; return; }
     el.innerHTML = currentImages.map((src, i) => `
-      <div class="photo-thumb">
+      <div class="photo-thumb" draggable="true" data-idx="${i}">
         <img src="${src}" alt="Photo ${i+1}">
         <button class="photo-thumb-remove" onclick="removePhoto(${i})" title="Supprimer">✕</button>
         ${i === 0 ? '<span class="photo-thumb-main">PRINCIPALE</span>' : ''}
+        <div class="photo-thumb-arrows">
+          ${i > 0 ? `<button class="photo-thumb-arrow" onclick="movePhoto(${i},-1)" title="Reculer">◀</button>` : ''}
+          ${i < currentImages.length-1 ? `<button class="photo-thumb-arrow" onclick="movePhoto(${i},1)" title="Avancer">▶</button>` : ''}
+        </div>
       </div>
     `).join('');
+
+    // Drag & drop
+    el.querySelectorAll('.photo-thumb').forEach(thumb => {
+      thumb.addEventListener('dragstart', e => {
+        dragSrcIdx = +thumb.dataset.idx;
+        thumb.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      thumb.addEventListener('dragend', () => {
+        el.querySelectorAll('.photo-thumb').forEach(t => t.classList.remove('dragging','drag-over'));
+      });
+      thumb.addEventListener('dragover', e => {
+        e.preventDefault();
+        el.querySelectorAll('.photo-thumb').forEach(t => t.classList.remove('drag-over'));
+        thumb.classList.add('drag-over');
+      });
+      thumb.addEventListener('drop', e => {
+        e.preventDefault();
+        const dropIdx = +thumb.dataset.idx;
+        if (dragSrcIdx === null || dragSrcIdx === dropIdx) return;
+        const moved = currentImages.splice(dragSrcIdx, 1)[0];
+        currentImages.splice(dropIdx, 0, moved);
+        dragSrcIdx = null;
+        renderThumbs();
+        updatePreview();
+      });
+    });
   }
 
   function handleOverlayClick(e) {
@@ -1153,9 +1300,10 @@
       showToast('Lampe ajoutée avec succès !');
     }
 
-    saveLamps();
-    renderGrid();
-    closeModal();
+    saveLamps(function() {
+      renderGrid();
+      closeModal();
+    });
   }
 
   /* ─── Delete ─── */
@@ -1165,9 +1313,10 @@
     const confirmed = confirm(`Êtes-vous sûr de vouloir supprimer "${lamp.name}" ?\n\nCette action est irréversible.`);
     if (confirmed) {
       lamps = lamps.filter(l => l.id !== id);
-      saveLamps();
-      renderGrid();
-      showToast('Lampe supprimée.');
+      saveLamps(function() {
+        renderGrid();
+        showToast('Lampe supprimée.');
+      });
     }
   }
 
@@ -1177,9 +1326,10 @@
     if (confirmed) {
       localStorage.removeItem(STORAGE_KEY);
       lamps = [...DEFAULT_LAMPS];
-      saveLamps();
-      renderGrid();
-      showToast('Catalogue réinitialisé !');
+      saveLamps(function() {
+        renderGrid();
+        showToast('Catalogue réinitialisé !');
+      });
     }
   }
 

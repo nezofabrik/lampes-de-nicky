@@ -5,16 +5,12 @@
 // ── LAMP DATA ─────────────────────────────────────────
 
 const DEFAULT_LAMPS = [
-  { id:'p1',  name:'La Bohème',   category:'suspension', price:89,  badge:'Nouveau',      badgeNew:true,  desc:"Abat-jour en rotin tissé à la main. Diffuse une lumière chaleureuse et tamisée. Câble textile crème de 1,5 m.", image:null },
-  { id:'p2',  name:"L'Atelier",  category:'suspension', price:120, badge:'Artisanal',    badgeNew:false, desc:"Câble textile tressé noir, douille en laiton brossé. Esprit industriel adouci par le toucher artisanal.", image:null },
-  { id:'p3',  name:'Le Cocon',   category:'suspension', price:145, badge:'Pièce unique', badgeNew:false, desc:"Suspension en papier washi recyclé, façonnée à la main. Chaque pièce est une œuvre unique aux reflets nacrés.", image:null },
-  { id:'p4',  name:'La Branche', category:'suspension', price:98,  badge:'Naturel',      badgeNew:false, desc:"Bois flotté naturel en barre, 3 ampoules à filament suspendues. Détails en cuivre martelé.", image:null },
-  { id:'p5',  name:"L'Aurore",   category:'table',      price:75,  badge:'Céramique',    badgeNew:false, desc:"Base en céramique teintée bleu-vert, tournée à la main. Abat-jour en lin brut pour une lumière douce.", image:null },
-  { id:'p6',  name:'Le Soir',    category:'table',      price:85,  badge:'Bois tourné',  badgeNew:false, desc:"Pied en bois de hêtre tourné à la main, abat-jour en coton épais couleur crème. Lumière enveloppante.", image:null },
-  { id:'p7',  name:'La Sieste',  category:'table',      price:65,  badge:'Grès',         badgeNew:false, desc:"Mini lampe en grès émaillé façonné à la main. Compacte et cosy, parfaite pour une table de chevet.", image:null },
-  { id:'p8',  name:"L'Éveil",   category:'table',      price:95,  badge:'Nouveau',      badgeNew:true,  desc:"Base en béton ciré coulé à la main, abat-jour plissé en soie sauvage dorée. Contraste saisissant.", image:null },
-  { id:'p9',  name:'Le Repaire', category:'applique',   price:110, badge:'Forgé main',   badgeNew:false, desc:"Applique en métal forgé orientable à 270°. Finition bronzée antique. Idéale pour un coin lecture ou bureau.", image:null },
-  { id:'p10', name:"L'Alcôve",  category:'applique',   price:130, badge:'Pièce unique', badgeNew:false, desc:"Applique en rotin tressé et métal noir. Crée de magnifiques jeux d'ombre et lumière sur vos murs.", image:null },
+  { id:'p1', name:'Lin Gris Anthracite', category:'suspension', price:164, badge:'Pièce rare', badgeNew:false,
+    desc:"Suspension en lin gris anthracite avec ficelle de chanvre. Bois réutilisé, fibre naturelle. Taille M : 65×22 cm. Ampoule non fournie.",
+    images:['images/lin-gris-1.jpg','images/lin-gris-2.jpg','images/lin-gris-3.jpg','images/lin-gris-4.jpg','images/lin-gris-5.jpg'], image:null },
+  { id:'p2', name:'Lin Beige & Blanc', category:'suspension', price:164, badge:'Pièce rare', badgeNew:false,
+    desc:"Suspension en lin extérieur beige et intérieur blanc, ficelle de chanvre. Bois réutilisé, fibre naturelle. Taille M : 62×26 cm. Ampoule non fournie.",
+    images:['images/lin-beige-1.jpg','images/lin-beige-2.jpg','images/lin-beige-3.jpg','images/lin-beige-4.jpg','images/lin-beige-5.jpg'], image:null },
 ];
 
 const LAMP_SVG = {
@@ -25,16 +21,43 @@ const LAMP_SVG = {
 
 function catLabel(c) { return {suspension:'Suspension',table:'Lampe de table',applique:'Applique murale'}[c] || c; }
 
-function getLamps() {
-  try {
-    const s = JSON.parse(localStorage.getItem('nicky_lamps'));
-    return s && s.length ? s : DEFAULT_LAMPS;
-  } catch {
-    return DEFAULT_LAMPS;
-  }
+// ── IndexedDB helpers ─────────────────────────────────
+const _DB_NAME = 'nickyDB', _DB_VER = 1, _STORE = 'lamps';
+let _db = null;
+
+function _openDB(cb) {
+  if (_db) { cb(_db); return; }
+  const req = indexedDB.open(_DB_NAME, _DB_VER);
+  req.onupgradeneeded = e => {
+    const d = e.target.result;
+    if (!d.objectStoreNames.contains(_STORE)) d.createObjectStore(_STORE, { keyPath: 'id' });
+  };
+  req.onsuccess = e => { _db = e.target.result; cb(_db); };
+  req.onerror   = () => cb(null);
 }
 
-function saveLamps(l) { localStorage.setItem('nicky_lamps', JSON.stringify(l)); }
+function getLampsAsync(cb) {
+  _openDB(function(d) {
+    if (!d) {
+      try {
+        const s = JSON.parse(localStorage.getItem('nicky_lamps'));
+        cb(s && s.length ? s : DEFAULT_LAMPS);
+      } catch { cb(DEFAULT_LAMPS); }
+      return;
+    }
+    const req = d.transaction(_STORE, 'readonly').objectStore(_STORE).getAll();
+    req.onsuccess = e => {
+      const arr = e.target.result;
+      if (!arr || !arr.length) {
+        try {
+          const s = JSON.parse(localStorage.getItem('nicky_lamps'));
+          cb(s && s.length ? s : DEFAULT_LAMPS);
+        } catch { cb(DEFAULT_LAMPS); }
+      } else { cb(arr); }
+    };
+    req.onerror = () => cb(DEFAULT_LAMPS);
+  });
+}
 
 // ── CARD RENDERING ────────────────────────────────────
 
@@ -65,24 +88,26 @@ function renderCard(lamp) {
 function renderGrid(containerId, filter) {
   const el = document.getElementById(containerId);
   if (!el) return;
-  const lamps = getLamps();
-  const list = (!filter || filter === 'all') ? lamps : lamps.filter(l => l.category === filter);
-  el.innerHTML = list.map(renderCard).join('');
-  el.querySelectorAll('.product-card').forEach((c, i) => { c.style.transitionDelay = `${i * 0.07}s`; });
-  initAddToCartButtons();
-  initScrollReveal();
-  initPriceCounters();
+  getLampsAsync(function(lamps) {
+    const list = (!filter || filter === 'all') ? lamps : lamps.filter(l => l.category === filter);
+    el.innerHTML = list.map(renderCard).join('');
+    el.querySelectorAll('.product-card').forEach((c, i) => { c.style.transitionDelay = `${i * 0.07}s`; });
+    initAddToCartButtons();
+    initScrollReveal();
+    initPriceCounters();
+  });
 }
 
 function renderFeatured(containerId) {
   const el = document.getElementById(containerId);
   if (!el) return;
-  const lamps = getLamps().slice(0, 3);
-  el.innerHTML = lamps.map(renderCard).join('');
-  el.querySelectorAll('.product-card').forEach((c, i) => { c.style.transitionDelay = `${i * 0.1}s`; });
-  initAddToCartButtons();
-  initScrollReveal();
-  initPriceCounters();
+  getLampsAsync(function(lamps) {
+    el.innerHTML = lamps.slice(0, 3).map(renderCard).join('');
+    el.querySelectorAll('.product-card').forEach((c, i) => { c.style.transitionDelay = `${i * 0.1}s`; });
+    initAddToCartButtons();
+    initScrollReveal();
+    initPriceCounters();
+  });
 }
 
 // ── CART ──────────────────────────────────────────────
