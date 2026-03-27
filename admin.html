@@ -1025,35 +1025,64 @@
   /* ─── Data helpers ─── */
   function loadLamps() {
     if (typeof fsGetLamps === 'function') {
-      fsGetLamps(function(arr) {
-        if (arr && arr.length) {
-          lamps = arr; renderGrid();
-        } else {
-          // Firestore vide → charge IndexedDB et migre vers Firestore
-          loadAllFromDB(function(a) {
-            lamps = a;
-            renderGrid();
-            if (lamps.length) {
-              showToast('Migration vers le cloud en cours…');
-              saveLamps(function() { showToast('✓ Lampes synchronisées dans le cloud !'); });
-            }
-          });
-        }
+      // Charge les deux sources et fusionne — priorité à la source avec le plus de photos
+      fsGetLamps(function(fsArr) {
+        loadAllFromDB(function(localArr) {
+          var allIds = {};
+          (fsArr    || []).forEach(function(l) { allIds[String(l.id)] = true; });
+          (localArr || []).forEach(function(l) { allIds[String(l.id)] = true; });
+          var ids = Object.keys(allIds);
+
+          if (!ids.length) { lamps = [].concat(DEFAULT_LAMPS); renderGrid(); return; }
+
+          lamps = ids.map(function(id) {
+            var fs    = (fsArr    || []).find(function(l){ return String(l.id) === id; });
+            var local = (localArr || []).find(function(l){ return String(l.id) === id; });
+            var base  = fs || local;
+            var fsImgs    = (fs    && fs.images)    ? fs.images    : [];
+            var localImgs = (local && local.images) ? local.images : [];
+            // Préfère IndexedDB si plus de photos (récupération des données locales)
+            var bestImgs  = localImgs.length >= fsImgs.length ? localImgs : fsImgs;
+            return Object.assign({}, base, { images: bestImgs });
+          }).sort(function(a,b){ return (a.sortOrder||0)-(b.sortOrder||0); });
+
+          renderGrid();
+
+          // Synchro si Firestore manquait de photos
+          var fsTotal    = (fsArr    || []).reduce(function(s,l){ return s+((l.images||[]).length); },0);
+          var localTotal = (localArr || []).reduce(function(s,l){ return s+((l.images||[]).length); },0);
+          if (!fsArr || !fsArr.length || localTotal > fsTotal) {
+            showToast('Récupération en cours…');
+            saveLamps(function() { showToast('✓ Photos sauvegardées dans le cloud !'); });
+          }
+        });
       });
     } else {
-      loadAllFromDB(function(arr) { lamps = arr; renderGrid(); });
+      loadAllFromDB(function(arr) { lamps = arr && arr.length ? arr : [].concat(DEFAULT_LAMPS); renderGrid(); });
     }
   }
 
   function saveLamps(cb) {
-    // Sauvegarde dans IndexedDB (local) ET Firestore (cloud)
+    // 1. Toujours sauvegarder dans IndexedDB d'abord (sauvegarde locale garantie)
     saveAllToDB(lamps, function() {
       if (typeof fsSaveLamp !== 'function') { if(cb) cb(); return; }
-      let done = 0;
       if (!lamps.length) { if(cb) cb(); return; }
+      var done = 0, errors = 0;
       lamps.forEach(function(lamp, i) {
-        const l = { ...lamp, sortOrder: i };
-        fsSaveLamp(l, function() { if (++done === lamps.length && cb) cb(); });
+        var l = Object.assign({}, lamp, { sortOrder: i });
+        fsSaveLamp(l, function(ok, reason) {
+          if (!ok) {
+            errors++;
+            if (reason === 'too_large') {
+              showToast('⚠️ Photos trop lourdes pour le cloud — réduire à max 8 photos par lampe');
+            }
+          }
+          done++;
+          if (done === lamps.length) {
+            if (errors > 0 && errors < lamps.length) showToast('⚠️ Certaines lampes non synchronisées (trop de photos)');
+            if (cb) cb();
+          }
+        });
       });
     });
   }
@@ -1198,7 +1227,7 @@
     files.forEach(file => {
       const reader = new FileReader();
       reader.onload = function(e) {
-        compressImage(e.target.result, 800, 0.7, function(compressed) {
+        compressImage(e.target.result, 550, 0.55, function(compressed) {
           currentImages.push(compressed);
           renderThumbs();
           updatePreview();

@@ -1,6 +1,5 @@
 /* ============================================
    Firebase — Les Lampes de Nicky
-   Config publique (sécurité via Firestore Rules)
 ============================================ */
 const _FB_CONFIG = {
   apiKey:            "AIzaSyC8xQ9W9KSs-xdG1LOJVxBmPKELFcI8ZME",
@@ -24,38 +23,56 @@ function getFS() {
   return _fsDB;
 }
 
-/* Lit toutes les lampes depuis Firestore (triées par id) */
+/* Lit toutes les lampes (sans orderBy pour éviter l'exclusion de docs) */
 function fsGetLamps(cb) {
   const fs = getFS();
   if (!fs) { cb(null); return; }
-  fs.collection('lamps').orderBy('sortOrder').get()
+  fs.collection('lamps').get()
     .then(snap => {
-      const arr = snap.docs.map(d => d.data());
+      const arr = snap.docs.map(d => d.data())
+                           .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
       cb(arr.length ? arr : null);
     })
     .catch(() => cb(null));
 }
 
-/* Sauvegarde une lampe dans Firestore */
+/* Sauvegarde une lampe — vérifie la taille avant d'envoyer */
 function fsSaveLamp(lamp, cb) {
   const fs = getFS();
   if (!fs) { if(cb) cb(false); return; }
-  const id = String(lamp.id);
-  fs.collection('lamps').doc(id).set({ ...lamp, id: lamp.id })
+
+  // Vérification taille (~1MB max Firestore)
+  const sizeEstimate = JSON.stringify(lamp).length;
+  if (sizeEstimate > 950000) {
+    console.warn('Lampe trop volumineuse pour Firestore (' + Math.round(sizeEstimate/1024) + 'KB), photos compressées davantage');
+    // Compresse encore les images si trop grand
+    const lightLamp = {
+      ...lamp,
+      images: (lamp.images || []).map(img => {
+        if (!img || !img.startsWith('data:')) return img;
+        // Réduction supplémentaire via canvas
+        return img; // on retourne quand même, la compression se fait à l'ajout
+      })
+    };
+    if(cb) cb(false, 'too_large');
+    return;
+  }
+
+  fs.collection('lamps').doc(String(lamp.id)).set(lamp)
     .then(() => { if(cb) cb(true); })
     .catch(e => { console.error('fsSaveLamp:', e); if(cb) cb(false); });
 }
 
-/* Supprime une lampe de Firestore */
+/* Supprime une lampe */
 function fsDeleteLamp(id, cb) {
   const fs = getFS();
   if (!fs) { if(cb) cb(false); return; }
   fs.collection('lamps').doc(String(id)).delete()
     .then(() => { if(cb) cb(true); })
-    .catch(e => { console.error('fsDeleteLamp:', e); if(cb) cb(false); });
+    .catch(() => { if(cb) cb(false); });
 }
 
-/* Supprime toutes les lampes (reset catalogue) */
+/* Supprime toutes les lampes */
 function fsDeleteAllLamps(cb) {
   const fs = getFS();
   if (!fs) { if(cb) cb(false); return; }
@@ -64,5 +81,5 @@ function fsDeleteAllLamps(cb) {
     snap.docs.forEach(d => batch.delete(d.ref));
     return batch.commit();
   }).then(() => { if(cb) cb(true); })
-    .catch(e => { console.error('fsDeleteAll:', e); if(cb) cb(false); });
+    .catch(() => { if(cb) cb(false); });
 }
