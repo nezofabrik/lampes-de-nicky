@@ -372,6 +372,18 @@ function initHeroText() {
 function initFilters() {
   const btns = document.querySelectorAll('.filter-btn');
   if (!btns.length) return;
+
+  // Update counts dynamically from lamp data
+  getLampsAsync(function(lamps) {
+    btns.forEach(btn => {
+      const f = btn.dataset.filter;
+      const count = f === 'all' ? lamps.length : lamps.filter(l => l.category === f).length;
+      // Replace label text (keep everything before the first "(")
+      const label = btn.textContent.replace(/\s*\(\d+\)/, '');
+      btn.textContent = label + ' (' + count + ')';
+    });
+  });
+
   btns.forEach(btn => {
     btn.addEventListener('click', () => {
       btns.forEach(b => b.classList.remove('active'));
