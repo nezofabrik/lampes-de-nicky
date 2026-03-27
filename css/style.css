@@ -1747,10 +1747,11 @@ body { transition: color 0.35s ease; }
   border-radius: 6px;
   width: 100%;
   max-width: 980px;
-  max-height: 90vh;
+  height: min(90vh, 640px);
   overflow: hidden;
   display: grid;
   grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr;
   position: relative;
   transform: translateY(30px) scale(0.97);
   transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
@@ -1792,6 +1793,8 @@ body { transition: color 0.35s ease; }
   background: var(--cream);
   overflow: hidden;
   position: relative;
+  height: 100%;
+  min-height: 0;
 }
 
 .pdm-main-wrap {
