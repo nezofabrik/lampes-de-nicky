@@ -964,9 +964,14 @@
       const tx = d.transaction(STORE_NAME, 'readwrite');
       const store = tx.objectStore(STORE_NAME);
       store.clear();
-      lampsArray.forEach(l => store.put(l));
+      // Ensure all lamps have a valid numeric id before saving
+      lampsArray.forEach((l, i) => {
+        const safeId = parseInt(l.id);
+        store.put({ ...l, id: isNaN(safeId) ? (i + 1) : safeId });
+      });
       tx.oncomplete = function() { if (cb) cb(); };
       tx.onerror    = function() { if (cb) cb(); };
+      tx.onabort    = function() { if (cb) cb(); };
     });
   }
 
@@ -1030,7 +1035,8 @@
   }
 
   function nextId() {
-    return lamps.length > 0 ? Math.max(...lamps.map(l => l.id)) + 1 : 1;
+    const nums = lamps.map(l => parseInt(l.id)).filter(n => !isNaN(n));
+    return nums.length > 0 ? Math.max(...nums) + 1 : 1;
   }
 
   /* ─── SVGs ─── */
