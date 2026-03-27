@@ -1024,14 +1024,28 @@
 
   /* ─── Data helpers ─── */
   function loadLamps() {
-    loadAllFromDB(function(arr) {
-      lamps = arr;
-      renderGrid();
-    });
+    // Essaie Firestore d'abord, fallback IndexedDB
+    if (typeof fsGetLamps === 'function') {
+      fsGetLamps(function(arr) {
+        if (arr && arr.length) { lamps = arr; renderGrid(); }
+        else { loadAllFromDB(function(a) { lamps = a; renderGrid(); }); }
+      });
+    } else {
+      loadAllFromDB(function(arr) { lamps = arr; renderGrid(); });
+    }
   }
 
   function saveLamps(cb) {
-    saveAllToDB(lamps, cb);
+    // Sauvegarde dans IndexedDB (local) ET Firestore (cloud)
+    saveAllToDB(lamps, function() {
+      if (typeof fsSaveLamp !== 'function') { if(cb) cb(); return; }
+      let done = 0;
+      if (!lamps.length) { if(cb) cb(); return; }
+      lamps.forEach(function(lamp, i) {
+        const l = { ...lamp, sortOrder: i };
+        fsSaveLamp(l, function() { if (++done === lamps.length && cb) cb(); });
+      });
+    });
   }
 
   function nextId() {
@@ -1319,6 +1333,8 @@
     const confirmed = confirm(`Êtes-vous sûr de vouloir supprimer "${lamp.name}" ?\n\nCette action est irréversible.`);
     if (confirmed) {
       lamps = lamps.filter(l => l.id !== id);
+      // Supprime de Firestore
+      if (typeof fsDeleteLamp === 'function') fsDeleteLamp(id, null);
       saveLamps(function() {
         renderGrid();
         showToast('Lampe supprimée.');
@@ -1332,10 +1348,14 @@
     if (confirmed) {
       localStorage.removeItem(STORAGE_KEY);
       lamps = [...DEFAULT_LAMPS];
-      saveLamps(function() {
-        renderGrid();
-        showToast('Catalogue réinitialisé !');
-      });
+      // Vide Firestore puis recharge les defaults
+      if (typeof fsDeleteAllLamps === 'function') {
+        fsDeleteAllLamps(function() {
+          saveLamps(function() { renderGrid(); showToast('Catalogue réinitialisé !'); });
+        });
+      } else {
+        saveLamps(function() { renderGrid(); showToast('Catalogue réinitialisé !'); });
+      }
     }
   }
 
@@ -1353,5 +1373,8 @@
   });
 </script>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
 </body>
 </html>

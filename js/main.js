@@ -37,6 +37,18 @@ function _openDB(cb) {
 }
 
 function getLampsAsync(cb) {
+  // Essaie Firestore d'abord, fallback IndexedDB/defaults
+  if (typeof fsGetLamps === 'function') {
+    fsGetLamps(function(arr) {
+      if (arr && arr.length) { cb(arr); return; }
+      _getLampsLocal(cb);
+    });
+  } else {
+    _getLampsLocal(cb);
+  }
+}
+
+function _getLampsLocal(cb) {
   _openDB(function(d) {
     if (!d) {
       try {
