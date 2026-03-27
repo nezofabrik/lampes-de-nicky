@@ -1024,11 +1024,21 @@
 
   /* ─── Data helpers ─── */
   function loadLamps() {
-    // Essaie Firestore d'abord, fallback IndexedDB
     if (typeof fsGetLamps === 'function') {
       fsGetLamps(function(arr) {
-        if (arr && arr.length) { lamps = arr; renderGrid(); }
-        else { loadAllFromDB(function(a) { lamps = a; renderGrid(); }); }
+        if (arr && arr.length) {
+          lamps = arr; renderGrid();
+        } else {
+          // Firestore vide → charge IndexedDB et migre vers Firestore
+          loadAllFromDB(function(a) {
+            lamps = a;
+            renderGrid();
+            if (lamps.length) {
+              showToast('Migration vers le cloud en cours…');
+              saveLamps(function() { showToast('✓ Lampes synchronisées dans le cloud !'); });
+            }
+          });
+        }
       });
     } else {
       loadAllFromDB(function(arr) { lamps = arr; renderGrid(); });
