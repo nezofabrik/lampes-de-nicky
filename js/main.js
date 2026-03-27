@@ -889,7 +889,7 @@ function initThemeToggle() {
 
       const id = card.dataset.id;
       getLampsAsync(function(lamps) {
-        const lamp = lamps.find(l => l.id === id);
+        const lamp = lamps.find(l => String(l.id) === String(id));
         if (lamp) openProductModal(lamp);
       });
     });
@@ -899,7 +899,11 @@ function initThemeToggle() {
   window.openProductModal  = openProductModal;
   window.closeProductModal = closeProductModal;
 
-  document.addEventListener('DOMContentLoaded', initProductCardClicks);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initProductCardClicks);
+  } else {
+    initProductCardClicks();
+  }
 
 })();
 
