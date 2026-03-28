@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page introuvable — Les Lampes de Nicky</title>
+  <meta name="description" content="Cette page n'existe pas ou a été déplacée.">
+  <link rel="stylesheet" href="css/style.css?v=6">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <script>(function(){var t=localStorage.getItem("nicky_theme");if(t==="dark")document.documentElement.setAttribute("data-theme","dark");}());</script>
+  <style>
+    .error-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 60vh;
+      padding: 4rem 1.5rem;
+    }
+    .error-page .lamp-icon {
+      width: 90px;
+      height: 90px;
+      color: var(--accent, #116466);
+      margin-bottom: 1.5rem;
+      opacity: 0.7;
+    }
+    .error-page h1 {
+      font-size: 2.2rem;
+      margin-bottom: 0.5rem;
+    }
+    .error-page .error-desc {
+      font-size: 1.1rem;
+      opacity: 0.7;
+      margin-bottom: 2rem;
+      max-width: 420px;
+    }
+    .error-links {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .error-links a {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s;
+    }
+    .error-links .btn-primary {
+      background: var(--accent, #116466);
+      color: #fff;
+    }
+    .error-links .btn-primary:hover {
+      opacity: 0.9;
+    }
+    .error-links .btn-secondary {
+      background: transparent;
+      border: 2px solid var(--accent, #116466);
+      color: var(--accent, #116466);
+    }
+    .error-links .btn-secondary:hover {
+      background: var(--accent, #116466);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════
+     HEADER
+════════════════════════════ -->
+<header>
+  <a href="index.html" class="logo" aria-label="Les Lampes de Nicky — Accueil">
+    <svg class="logo-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="22" cy="24" rx="14" ry="5" fill="currentColor" opacity="0.15"/>
+      <path d="M10 26 L16 10 L28 10 L34 26 Z" fill="currentColor" opacity="0.9"/>
+      <path d="M14 24 L18 12 L26 12 L30 24 Z" fill="white" opacity="0.08"/>
+      <rect x="20.5" y="26" width="3" height="10" fill="currentColor" opacity="0.7" rx="1"/>
+      <ellipse cx="22" cy="37" rx="7" ry="2.2" fill="currentColor" opacity="0.6"/>
+      <ellipse cx="22" cy="26.5" rx="6" ry="2" fill="currentColor" opacity="0.25"/>
+    </svg>
+    <div class="logo-text">
+      <span class="brand">Les lampes</span>
+      <span class="sub">de Nicky</span>
+    </div>
+  </a>
+
+  <nav>
+    <a href="index.html">Accueil</a>
+    <a href="articles.html">Boutique</a>
+    <a href="contact.html">Contact</a>
+      <div class="dark-teaser-wrap">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Mode sombre/clair">
+          <svg class="icon-moon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg class="icon-sun"  width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+        <div class="dark-teaser" id="dark-teaser">
+          <span class="dark-teaser-star">✦</span>
+          <span>Mode nuit</span>
+          <span class="dark-teaser-arrow">↑</span>
+        </div>
+      </div>
+    <a href="checkout.html" class="nav-cart">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/>
+        <path d="M16 10a4 4 0 01-8 0"/>
+      </svg>
+      Panier
+      <span class="cart-count" style="display:none">0</span>
+    </a>
+  </nav>
+</header>
+
+<!-- ════════════════════════════
+     404 CONTENT
+════════════════════════════ -->
+<main class="error-page">
+  <svg class="lamp-icon" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="22" cy="24" rx="14" ry="5" fill="currentColor" opacity="0.15"/>
+    <path d="M10 26 L16 10 L28 10 L34 26 Z" fill="currentColor" opacity="0.9"/>
+    <rect x="20.5" y="26" width="3" height="10" fill="currentColor" opacity="0.7" rx="1"/>
+    <ellipse cx="22" cy="37" rx="7" ry="2.2" fill="currentColor" opacity="0.6"/>
+    <ellipse cx="22" cy="26.5" rx="6" ry="2" fill="currentColor" opacity="0.25"/>
+  </svg>
+  <h1>Page introuvable</h1>
+  <p class="error-desc">Cette page n'existe pas ou a été déplacée.</p>
+  <div class="error-links">
+    <a href="index.html" class="btn-primary">Retour à l'accueil</a>
+    <a href="articles.html" class="btn-secondary">Voir la boutique</a>
+  </div>
+</main>
+
+<!-- ════════════════════════════
+     FOOTER
+════════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-grid">
+
+      <div class="footer-brand">
+        <a href="index.html" class="logo" style="margin-bottom:1rem;">
+          <svg class="logo-icon" viewBox="0 0 44 44" fill="none">
+            <ellipse cx="22" cy="24" rx="14" ry="5" fill="currentColor" opacity="0.15"/>
+            <path d="M10 26 L16 10 L28 10 L34 26 Z" fill="currentColor" opacity="0.9"/>
+            <rect x="20.5" y="26" width="3" height="10" fill="currentColor" opacity="0.7" rx="1"/>
+            <ellipse cx="22" cy="37" rx="7" ry="2.2" fill="currentColor" opacity="0.6"/>
+          </svg>
+          <div class="logo-text">
+            <span class="brand">Les lampes</span>
+            <span class="sub">de Nicky</span>
+          </div>
+        </a>
+        <p>Des lampes artisanales uniques, conçues avec amour dans un petit atelier. Chaque pièce illumine votre intérieur d'une chaleur authentique.</p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Boutique</h4>
+        <ul>
+          <li><a href="articles.html">Toutes les lampes</a></li>
+          <li><a href="articles.html?cat=suspension">Suspensions</a></li>
+          <li><a href="articles.html?cat=table">Lampes de table</a></li>
+          <li><a href="articles.html?cat=applique">Appliques murales</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Informations</h4>
+        <ul>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="#">Livraison & retours</a></li>
+          <li><a href="#">Entretien des lampes</a></li>
+          <li><a href="#">Commande sur mesure</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Légal</h4>
+        <ul>
+          <li><a href="#">Mentions légales</a></li>
+          <li><a href="#">CGV</a></li>
+          <li><a href="#">Confidentialité</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2025 Les Lampes de Nicky · Tous droits réservés</span>
+      <span>Fait avec amour · Site créé par <a href="https://www.14level-up.ch" target="_blank" rel="noopener">14LevelUp</a></span>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

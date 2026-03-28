@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Administration — Les Lampes de Nicky</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#116466">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -744,13 +746,17 @@
     </a>
     <h1>Espace administration</h1>
     <p class="subtitle">Connexion requise pour gérer le catalogue</p>
-    <div class="error-msg" id="login-error">Mot de passe incorrect. Veuillez réessayer.</div>
+    <div class="error-msg" id="login-error">Email ou mot de passe incorrect.</div>
     <form id="login-form">
       <div class="form-group">
-        <label for="password-input">Mot de passe</label>
-        <input type="password" id="password-input" placeholder="Entrez votre mot de passe" autocomplete="current-password">
+        <label for="email-input">Email</label>
+        <input type="email" id="email-input" placeholder="votre@email.com" autocomplete="email" required>
       </div>
-      <button type="submit" class="btn btn-primary">Se connecter</button>
+      <div class="form-group">
+        <label for="password-input">Mot de passe</label>
+        <input type="password" id="password-input" placeholder="Mot de passe" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn btn-primary" id="login-btn">Se connecter</button>
     </form>
   </div>
 </div>
@@ -773,6 +779,12 @@
       </div>
     </div>
     <div class="admin-header-right">
+      <button id="signout-btn" class="back-link" style="background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:0.4rem;">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Se déconnecter
+      </button>
       <a href="index.html" class="back-link">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
@@ -926,7 +938,6 @@
   ];
 
   const STORAGE_KEY = 'nicky_lamps';
-  const PASSWORD    = 'nicky2025';
   const DB_NAME     = 'nickyDB';
   const DB_VERSION  = 1;
   const STORE_NAME  = 'lamps';
@@ -1006,20 +1017,51 @@
   }
 
   /* ─── Auth ─── */
+
+  // Auto-login : si déjà authentifié, aller directement au panel
+  function checkAuthState() {
+    if (typeof firebase === 'undefined' || !firebase.auth) return;
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('admin-panel').style.display  = 'block';
+        loadLamps();
+      }
+    });
+  }
+  // Appelé quand Firebase est prêt (scripts chargés après ce bloc)
+  setTimeout(checkAuthState, 200);
+
   document.getElementById('login-form').addEventListener('submit', function(e) {
     e.preventDefault();
-    const val = document.getElementById('password-input').value;
-    if (val === PASSWORD) {
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('admin-panel').style.display = 'block';
-      loadLamps();
-    } else {
-      const err = document.getElementById('login-error');
-      err.classList.add('show');
-      document.getElementById('password-input').value = '';
-      document.getElementById('password-input').focus();
-      setTimeout(() => err.classList.remove('show'), 3500);
-    }
+    const email = document.getElementById('email-input').value.trim();
+    const pass  = document.getElementById('password-input').value;
+    const btn   = document.getElementById('login-btn');
+    const err   = document.getElementById('login-error');
+
+    btn.disabled    = true;
+    btn.textContent = 'Connexion…';
+
+    firebase.auth().signInWithEmailAndPassword(email, pass)
+      .then(function() {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('admin-panel').style.display  = 'block';
+        loadLamps();
+      })
+      .catch(function(error) {
+        var msg = 'Email ou mot de passe incorrect.';
+        if (error.code === 'auth/user-not-found') msg = 'Aucun compte trouvé avec cet email.';
+        if (error.code === 'auth/wrong-password') msg = 'Mot de passe incorrect.';
+        if (error.code === 'auth/too-many-requests') msg = 'Trop de tentatives. Réessayez plus tard.';
+        if (error.code === 'auth/network-request-failed') msg = 'Erreur réseau. Vérifiez votre connexion.';
+        err.textContent = msg;
+        err.classList.add('show');
+        document.getElementById('password-input').value = '';
+        document.getElementById('password-input').focus();
+        setTimeout(function() { err.classList.remove('show'); }, 4000);
+        btn.disabled    = false;
+        btn.textContent = 'Se connecter';
+      });
   });
 
   /* ─── Data helpers ─── */
@@ -1041,8 +1083,9 @@
             var base  = fs || local;
             var fsImgs    = (fs    && fs.images)    ? fs.images    : [];
             var localImgs = (local && local.images) ? local.images : [];
-            // Préfère IndexedDB si plus de photos (récupération des données locales)
-            var bestImgs  = localImgs.length >= fsImgs.length ? localImgs : fsImgs;
+            // Préfère Firestore si les images sont des URLs Storage
+            var fsHasUrls = fsImgs.length && fsImgs[0] && fsImgs[0].indexOf('firebasestorage') !== -1;
+            var bestImgs  = fsHasUrls ? fsImgs : (localImgs.length >= fsImgs.length ? localImgs : fsImgs);
             return Object.assign({}, base, { images: bestImgs });
           }).sort(function(a,b){ return (a.sortOrder||0)-(b.sortOrder||0); });
 
@@ -1171,6 +1214,7 @@
   /* ─── Modal ─── */
   function openModal(id) {
     editingId = id;
+    deletedStorageImages = [];
     const overlay = document.getElementById('modal-overlay');
     document.getElementById('modal-title').textContent = id ? 'Modifier la lampe' : 'Ajouter une lampe';
 
@@ -1224,10 +1268,15 @@
 
   function handlePhotos(input) {
     const files = Array.from(input.files);
-    files.forEach(file => {
+    const MAX_PHOTOS = 20;
+    if (currentImages.length + files.length > MAX_PHOTOS) {
+      showToast('⚠️ Maximum ' + MAX_PHOTOS + ' photos par lampe');
+    }
+    var toProcess = files.slice(0, MAX_PHOTOS - currentImages.length);
+    toProcess.forEach(file => {
       const reader = new FileReader();
       reader.onload = function(e) {
-        compressImage(e.target.result, 550, 0.55, function(compressed) {
+        compressImage(e.target.result, 800, 0.7, function(compressed) {
           currentImages.push(compressed);
           renderThumbs();
           updatePreview();
@@ -1238,8 +1287,14 @@
     input.value = '';
   }
 
+  var deletedStorageImages = [];
+
   function removePhoto(idx) {
-    currentImages.splice(idx, 1);
+    var removed = currentImages.splice(idx, 1)[0];
+    // Si c'est une URL Storage, la marquer pour suppression différée
+    if (removed && !isBase64Image(removed) && removed.indexOf('firebasestorage') !== -1) {
+      deletedStorageImages.push(removed);
+    }
     renderThumbs();
     updatePreview();
   }
@@ -1348,30 +1403,61 @@
     if (!name) { alert('Veuillez saisir un nom pour la lampe.'); document.getElementById('f-name').focus(); return; }
     if (!price || price <= 0) { alert('Veuillez saisir un prix valide.'); document.getElementById('f-price').focus(); return; }
 
-    if (editingId !== null) {
-      const idx = lamps.findIndex(l => l.id === editingId);
-      if (idx !== -1) {
-        lamps[idx] = { ...lamps[idx], name, category, price, badge, badgeNew: isNew, desc, comment, images: [...currentImages] };
-        showToast('Lampe modifiée avec succès !');
+    var lampId = editingId !== null ? editingId : nextId();
+
+    // Désactiver le bouton pendant l'upload
+    var saveBtn = document.querySelector('.modal-footer .btn-primary');
+    if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Envoi des photos…'; }
+
+    // Upload des images base64 vers Firebase Storage
+    var hasBase64 = currentImages.some(function(s) { return isBase64Image(s); });
+
+    function finalizeSave(finalImages) {
+      if (editingId !== null) {
+        var idx = lamps.findIndex(function(l) { return l.id === editingId; });
+        if (idx !== -1) {
+          lamps[idx] = Object.assign({}, lamps[idx], { name: name, category: category, price: price, badge: badge, badgeNew: isNew, desc: desc, comment: comment, images: finalImages });
+        }
+      } else {
+        lamps.push({ id: lampId, name: name, category: category, price: price, badge: badge, badgeNew: isNew, desc: desc, comment: comment, images: finalImages, image: '' });
       }
-    } else {
-      lamps.push({ id: nextId(), name, category, price, badge, badgeNew: isNew, desc, comment, images: [...currentImages], image: '' });
-      showToast('Lampe ajoutée avec succès !');
+
+      // Supprimer les images Storage marquées pour suppression
+      if (deletedStorageImages.length && typeof fsStoragePathFromUrl === 'function') {
+        deletedStorageImages.forEach(function(url) {
+          var path = fsStoragePathFromUrl(url);
+          if (path && typeof fsDeleteSingleImage === 'function') fsDeleteSingleImage(path, function() {});
+        });
+        deletedStorageImages = [];
+      }
+
+      saveLamps(function() {
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Enregistrer'; }
+        showToast(editingId !== null ? 'Lampe modifiée avec succès !' : 'Lampe ajoutée avec succès !');
+        renderGrid();
+        closeModal();
+      });
     }
 
-    saveLamps(function() {
-      renderGrid();
-      closeModal();
-    });
+    if (hasBase64 && typeof fsUploadAllImages === 'function') {
+      showToast('📷 Envoi des photos vers le cloud…');
+      fsUploadAllImages(lampId, currentImages.slice(), function(uploadedImages) {
+        finalizeSave(uploadedImages);
+      });
+    } else {
+      finalizeSave(currentImages.slice());
+    }
   }
 
   /* ─── Delete ─── */
   function deleteLamp(id) {
     const lamp = lamps.find(l => l.id === id);
     if (!lamp) return;
-    const confirmed = confirm(`Êtes-vous sûr de vouloir supprimer "${lamp.name}" ?\n\nCette action est irréversible.`);
+    const confirmed = confirm('Êtes-vous sûr de vouloir supprimer "' + lamp.name + '" ?\n\nCette action est irréversible.');
     if (confirmed) {
       lamps = lamps.filter(l => l.id !== id);
+      // Supprime les images de Storage
+      if (typeof fsDeleteLampImages === 'function') fsDeleteLampImages(id, function() {});
       // Supprime de Firestore
       if (typeof fsDeleteLamp === 'function') fsDeleteLamp(id, null);
       saveLamps(function() {
@@ -1406,6 +1492,16 @@
     setTimeout(() => t.classList.remove('show'), 2800);
   }
 
+  /* ─── Sign out ─── */
+  document.getElementById('signout-btn').addEventListener('click', function() {
+    firebase.auth().signOut().then(function() {
+      document.getElementById('admin-panel').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'flex';
+      document.getElementById('password-input').value = '';
+      document.getElementById('email-input').value = '';
+    });
+  });
+
   /* ─── Keyboard ─── */
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') closeModal();
@@ -1413,7 +1509,9 @@
 </script>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <script src="js/firebase-config.js"></script>
 </body>
 </html>

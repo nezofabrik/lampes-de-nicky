@@ -73,11 +73,16 @@ function _getLampsLocal(cb) {
 
 // ── CARD RENDERING ────────────────────────────────────
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
 function renderCard(lamp) {
   const firstImg = (lamp.images && lamp.images.length) ? lamp.images[0] : lamp.image;
   const cat = lamp.category || 'suspension';
   const ph = firstImg
-    ? `<img src="${firstImg}" alt="${lamp.name}" class="product-photo" data-cat="${cat}" style="width:100%;height:100%;object-fit:cover">`
+    ? `<img src="${firstImg}" alt="${escapeHtml(lamp.name)}" class="product-photo" data-cat="${cat}" style="width:100%;height:100%;object-fit:cover">`
     : `<div class="img-placeholder ph-${cat}">${LAMP_SVG[cat] || ''}</div>`;
   return `
   <div class="product-card reveal" data-id="${lamp.id}" data-name="${lamp.name.replace(/"/g, '&quot;')}" data-price="${lamp.price}" data-category="${lamp.category}">
@@ -87,9 +92,9 @@ function renderCard(lamp) {
     </div>
     <div class="product-info">
       <div class="product-category">${catLabel(lamp.category)}</div>
-      <div class="product-name">${lamp.name}</div>
-      <div class="product-desc">${lamp.desc}</div>
-      ${lamp.comment ? `<div class="product-comment">"${lamp.comment}"</div>` : ''}
+      <div class="product-name">${escapeHtml(lamp.name)}</div>
+      <div class="product-desc">${escapeHtml(lamp.desc)}</div>
+      ${lamp.comment ? `<div class="product-comment">"${escapeHtml(lamp.comment)}"</div>` : ''}
       <div class="product-footer">
         <span class="product-price" data-target="${lamp.price}">0 CHF</span>
         <button class="add-to-cart">Ajouter</button>
@@ -101,6 +106,10 @@ function renderCard(lamp) {
 function renderGrid(containerId, filter) {
   const el = document.getElementById(containerId);
   if (!el) return;
+  // Show loading skeletons
+  if (!el.innerHTML || el.innerHTML.trim() === '' || el.querySelector('.skeleton-card')) {
+    el.innerHTML = Array(4).fill('<div class="skeleton-card"><div class="skeleton-image"></div><div class="skeleton-text"><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div></div></div>').join('');
+  }
   getLampsAsync(function(lamps) {
     const list = (!filter || filter === 'all') ? lamps : lamps.filter(l => l.category === filter);
     el.innerHTML = list.map(renderCard).join('');
@@ -114,6 +123,9 @@ function renderGrid(containerId, filter) {
 function renderFeatured(containerId) {
   const el = document.getElementById(containerId);
   if (!el) return;
+  if (!el.innerHTML || el.innerHTML.trim() === '') {
+    el.innerHTML = Array(3).fill('<div class="skeleton-card"><div class="skeleton-image"></div><div class="skeleton-text"><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div><div class="skeleton-line"></div></div></div>').join('');
+  }
   getLampsAsync(function(lamps) {
     el.innerHTML = lamps.slice(0, 3).map(renderCard).join('');
     el.querySelectorAll('.product-card').forEach((c, i) => { c.style.transitionDelay = `${i * 0.1}s`; });
@@ -251,7 +263,7 @@ function formatCat(cat) {
 
 function updateSummary(total) {
   const shipping = total >= 80 ? 0 : 8.9;
-  const tva = total * 0.2;
+  const tva = total * 0.081;
 
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
   set('summary-subtotal', total.toFixed(2) + ' CHF');
@@ -1020,6 +1032,21 @@ document.addEventListener('DOMContentLoaded', () => {
   initParallax();
   initHeroText();
   initDarkTeaser();
+
+  // Back-to-top button
+  (function() {
+    var btn = document.createElement('button');
+    btn.className = 'back-to-top';
+    btn.setAttribute('aria-label', 'Retour en haut');
+    btn.innerHTML = '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>';
+    document.body.appendChild(btn);
+    btn.addEventListener('click', function() { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    var scrollHandler = function() {
+      if (window.scrollY > 400) btn.classList.add('visible');
+      else btn.classList.remove('visible');
+    };
+    window.addEventListener('scroll', scrollHandler, { passive: true });
+  })();
 
   // Lucioles si déjà en mode sombre au chargement
   if (document.documentElement.getAttribute('data-theme') === 'dark') {

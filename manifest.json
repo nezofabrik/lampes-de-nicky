@@ -1,0 +1,17 @@
+{
+  "name": "Les Lampes de Nicky",
+  "short_name": "Lampes Nicky",
+  "description": "Lampes artisanales faites main avec des matériaux naturels",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F0E8",
+  "theme_color": "#116466",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

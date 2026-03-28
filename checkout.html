@@ -4,8 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mon Panier — Les Lampes de Nicky</title>
-  <link rel="stylesheet" href="css/style.css?v=5">
+  <link rel="stylesheet" href="css/style.css?v=6">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <meta name="description" content="Finalisez votre commande de lampes artisanales Les Lampes de Nicky. Livraison soignée en Suisse et en Europe.">
+  <meta name="theme-color" content="#116466">
+  <meta name="robots" content="noindex">
   <style>
     .steps {
       display: flex;
@@ -101,6 +104,8 @@
   <script>(function(){var t=localStorage.getItem("nicky_theme");if(t==="dark")document.documentElement.setAttribute("data-theme","dark");}());</script>
 </head>
 <body>
+<a href="#main-content" class="skip-link">Aller au contenu principal</a>
+<noscript><div style="background:#116466;color:white;text-align:center;padding:1rem;">Ce site nécessite JavaScript pour fonctionner correctement.</div></noscript>
 
 <!-- HEADER -->
 <header>
@@ -116,7 +121,7 @@
       <span class="sub">de Nicky</span>
     </div>
   </a>
-  <nav>
+  <nav role="navigation" aria-label="Navigation principale">
     <a href="index.html">Accueil</a>
     <a href="articles.html">Boutique</a>
     <a href="contact.html">Contact</a>
@@ -163,7 +168,7 @@
 </div>
 
 <!-- CHECKOUT CONTENT -->
-<section style="background: var(--cream);">
+<section style="background: var(--cream);" id="main-content">
   <div class="container">
 
     <!-- SUCCESS MESSAGE -->
@@ -414,7 +419,7 @@
               <span id="summary-shipping">—</span>
             </div>
             <div class="summary-row">
-              <span>TVA (20%)</span>
+              <span>TVA (8.1%)</span>
               <span id="summary-tva">0,00 CHF</span>
             </div>
             <div class="summary-row total">
@@ -528,7 +533,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2025 Les Lampes de Nicky · Tous droits réservés</span>
+      <span>© 2025–2026 Les Lampes de Nicky · Tous droits réservés</span>
       <span>Fait avec amour · Site créé par <a href="https://www.14level-up.ch" target="_blank" rel="noopener">14LevelUp</a></span>
     </div>
   </div>
