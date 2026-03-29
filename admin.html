@@ -1042,26 +1042,48 @@
     btn.disabled    = true;
     btn.textContent = 'Connexion…';
 
-    firebase.auth().signInWithEmailAndPassword(email, pass)
-      .then(function() {
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('admin-panel').style.display  = 'block';
-        loadLamps();
-      })
-      .catch(function(error) {
-        var msg = 'Email ou mot de passe incorrect.';
-        if (error.code === 'auth/user-not-found') msg = 'Aucun compte trouvé avec cet email.';
-        if (error.code === 'auth/wrong-password') msg = 'Mot de passe incorrect.';
-        if (error.code === 'auth/too-many-requests') msg = 'Trop de tentatives. Réessayez plus tard.';
-        if (error.code === 'auth/network-request-failed') msg = 'Erreur réseau. Vérifiez votre connexion.';
-        err.textContent = msg;
-        err.classList.add('show');
-        document.getElementById('password-input').value = '';
-        document.getElementById('password-input').focus();
-        setTimeout(function() { err.classList.remove('show'); }, 4000);
-        btn.disabled    = false;
-        btn.textContent = 'Se connecter';
-      });
+    // Vérification que Firebase est prêt
+    if (typeof firebase === 'undefined' || typeof firebase.auth !== 'function') {
+      err.textContent = 'Firebase non chargé. Rechargez la page.';
+      err.classList.add('show');
+      console.error('firebase ou firebase.auth non disponible', typeof firebase);
+      btn.disabled = false;
+      btn.textContent = 'Se connecter';
+      return;
+    }
+
+    try {
+      firebase.auth().signInWithEmailAndPassword(email, pass)
+        .then(function() {
+          document.getElementById('login-screen').style.display = 'none';
+          document.getElementById('admin-panel').style.display  = 'block';
+          loadLamps();
+        })
+        .catch(function(error) {
+          console.error('Auth error:', error.code, error.message);
+          var msg = 'Email ou mot de passe incorrect.';
+          if (error.code === 'auth/user-not-found')           msg = 'Aucun compte avec cet email.';
+          else if (error.code === 'auth/wrong-password')      msg = 'Mot de passe incorrect.';
+          else if (error.code === 'auth/invalid-credential')  msg = 'Email ou mot de passe incorrect.';
+          else if (error.code === 'auth/invalid-email')       msg = 'Format email invalide.';
+          else if (error.code === 'auth/too-many-requests')   msg = 'Trop de tentatives. Réessayez plus tard.';
+          else if (error.code === 'auth/network-request-failed') msg = 'Erreur réseau.';
+          else msg = error.message || 'Erreur de connexion.';
+          err.textContent = msg;
+          err.classList.add('show');
+          document.getElementById('password-input').value = '';
+          document.getElementById('password-input').focus();
+          setTimeout(function() { err.classList.remove('show'); }, 5000);
+          btn.disabled    = false;
+          btn.textContent = 'Se connecter';
+        });
+    } catch(ex) {
+      console.error('Auth exception:', ex);
+      err.textContent = 'Erreur: ' + ex.message;
+      err.classList.add('show');
+      btn.disabled = false;
+      btn.textContent = 'Se connecter';
+    }
   });
 
   /* ─── Data helpers ─── */
