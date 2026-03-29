@@ -27,12 +27,8 @@ function getFS() {
   if (_fsDB) return _fsDB;
   try {
     _initApp();
-    if (typeof firebase !== 'undefined') {
+    if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length) {
       _fsDB = firebase.firestore();
-      if (!_fsPersistDone) {
-        _fsPersistDone = true;
-        _fsDB.enablePersistence({ synchronizeTabs: true }).catch(function() {});
-      }
     }
   } catch(e) { console.warn('Firebase init:', e); }
   return _fsDB;
@@ -51,17 +47,29 @@ function getStorage() {
 
 /* ─── Firestore : Lampes ─── */
 
-/* Lit toutes les lampes (sans orderBy pour éviter l'exclusion de docs) */
+/* Lit toutes les lampes avec timeout de sécurité */
 function fsGetLamps(cb) {
   var fs = getFS();
   if (!fs) { cb(null); return; }
+  var done = false;
+  // Timeout : si Firestore ne répond pas en 6s, fallback
+  var timer = setTimeout(function() {
+    if (!done) { done = true; console.warn('fsGetLamps timeout'); cb(null); }
+  }, 6000);
   fs.collection('lamps').get()
     .then(function(snap) {
+      if (done) return;
+      done = true; clearTimeout(timer);
       var arr = snap.docs.map(function(d) { return d.data(); })
                          .sort(function(a, b) { return (a.sortOrder || 0) - (b.sortOrder || 0); });
       cb(arr.length ? arr : null);
     })
-    .catch(function() { cb(null); });
+    .catch(function(e) {
+      if (done) return;
+      done = true; clearTimeout(timer);
+      console.warn('fsGetLamps error:', e);
+      cb(null);
+    });
 }
 
 /* Sauvegarde une lampe */
