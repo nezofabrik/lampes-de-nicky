@@ -1127,6 +1127,25 @@
     }
   }
 
+  /* Recompresse toutes les images base64 d'une lampe, puis appelle cb(lampAvecImagesCompressées) */
+  function _recompressLampImages(lamp, cb) {
+    var imgs = lamp.images || [];
+    if (!imgs.length) { cb(lamp); return; }
+    var result = imgs.slice();
+    var pending = 0;
+    imgs.forEach(function(src, i) {
+      if (src && src.indexOf('data:') === 0) {
+        pending++;
+        compressImage(src, 400, 0.4, function(c) {
+          result[i] = c;
+          pending--;
+          if (pending === 0) cb(Object.assign({}, lamp, { images: result }));
+        });
+      }
+    });
+    if (pending === 0) cb(lamp);
+  }
+
   function saveLamps(cb) {
     // 1. Toujours sauvegarder dans IndexedDB d'abord (sauvegarde locale garantie)
     saveAllToDB(lamps, function() {
@@ -1135,23 +1154,46 @@
       var done = 0, errors = 0;
       lamps.forEach(function(lamp, i) {
         var l = Object.assign({}, lamp, { sortOrder: i });
+        /* Essai 1 : taille originale */
         fsSaveLamp(l, function(ok, reason) {
-          if (!ok) {
-            errors++;
-            if (reason === 'too_large') {
-              showToast('⚠️ Photos trop lourdes — compresse ou réduis le nombre de photos');
-            } else if (reason === 'not_auth') {
-              showToast('❌ Non connecté — veuillez vous reconnecter');
-            } else {
-              showToast('❌ Erreur cloud: ' + (reason || 'inconnue'));
+          if (ok) {
+            done++;
+            if (done === lamps.length) {
+              showToast('✅ ' + lamps.length + ' lampe(s) sauvegardée(s) dans le cloud');
+              if (cb) cb();
             }
+            return;
           }
-          done++;
-          if (done === lamps.length) {
-            if (errors === 0) showToast('✅ ' + lamps.length + ' lampe(s) sauvegardée(s) dans le cloud');
-            else if (errors < lamps.length) showToast('⚠️ ' + (lamps.length - errors) + '/' + lamps.length + ' lampes synchronisées');
-            else showToast('❌ Échec sauvegarde cloud — lampes en local uniquement');
-            if (cb) cb();
+          if (reason === 'too_large') {
+            /* Essai 2 : recompresser les images puis réessayer */
+            _recompressLampImages(l, function(lSmall) {
+              fsSaveLamp(lSmall, function(ok2, reason2) {
+                if (!ok2) {
+                  errors++;
+                  if (reason2 === 'not_auth') showToast('❌ Non connecté — veuillez vous reconnecter');
+                  else showToast('❌ ' + lamp.name + ' : trop lourde même après compression');
+                } else {
+                  /* Mettre à jour les images compressées en local aussi */
+                  var idx2 = lamps.findIndex(function(x) { return x.id === lamp.id; });
+                  if (idx2 !== -1) lamps[idx2] = Object.assign({}, lamps[idx2], { images: lSmall.images });
+                }
+                done++;
+                if (done === lamps.length) {
+                  if (errors === 0) showToast('✅ ' + lamps.length + ' lampe(s) dans le cloud');
+                  else showToast('⚠️ ' + (lamps.length - errors) + '/' + lamps.length + ' lampes synchronisées');
+                  if (cb) cb();
+                }
+              });
+            });
+          } else {
+            errors++;
+            if (reason === 'not_auth') showToast('❌ Non connecté — reconnectez-vous');
+            else showToast('❌ Erreur cloud: ' + (reason || 'inconnue'));
+            done++;
+            if (done === lamps.length) {
+              showToast('⚠️ ' + (lamps.length - errors) + '/' + lamps.length + ' lampes synchronisées');
+              if (cb) cb();
+            }
           }
         });
       });
