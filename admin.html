@@ -937,10 +937,12 @@
     { id:10, name:"Nuage de Coton",    category:"applique",   price:128, badge:"",           badgeNew:true,  desc:"Applique diffusante en forme de nuage, tissu de coton ouaté, lumière enveloppante.", image:"" },
   ];
 
-  const STORAGE_KEY = 'nicky_lamps';
-  const DB_NAME     = 'nickyDB';
-  const DB_VERSION  = 1;
-  const STORE_NAME  = 'lamps';
+  const STORAGE_KEY       = 'nicky_lamps';
+  const DB_NAME           = 'nickyDB';
+  const DB_VERSION        = 1;
+  const STORE_NAME        = 'lamps';
+  const CLOUDINARY_CLOUD  = 'djkkbhzec';
+  const CLOUDINARY_PRESET = 'lampes-nicky';
 
   let lamps = [];
   let editingId = null;
@@ -1154,8 +1156,9 @@
       var done = 0, errors = 0;
       lamps.forEach(function(lamp, i) {
         var l = Object.assign({}, lamp, { sortOrder: i });
-        /* Essai 1 : taille originale */
-        fsSaveLamp(l, function(ok, reason) {
+        /* Migration base64 → Cloudinary puis sauvegarde */
+        _migrateImagesToCloudinary(l, function(lMig) {
+        fsSaveLamp(lMig, function(ok, reason) {
           if (ok) {
             done++;
             if (done === lamps.length) {
@@ -1196,6 +1199,7 @@
             }
           }
         });
+        }); /* fin _migrateImagesToCloudinary */
       });
     });
   }
@@ -1322,6 +1326,44 @@
     editingId = null;
   }
 
+  /* ─── Cloudinary upload ─── */
+  function uploadToCloudinary(fileOrDataUrl, cb) {
+    var formData = new FormData();
+    formData.append('file', fileOrDataUrl);
+    formData.append('upload_preset', CLOUDINARY_PRESET);
+    formData.append('folder', 'lampes-de-nicky');
+    fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/image/upload', {
+      method: 'POST',
+      body: formData
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) { cb(d.secure_url || null); })
+    .catch(function() { cb(null); });
+  }
+
+  /* Migration automatique : remplace les base64 d'une lampe par des URLs Cloudinary */
+  function _migrateImagesToCloudinary(lamp, cb) {
+    var imgs = lamp.images || [];
+    var toMigrate = imgs.filter(function(s) { return s && s.indexOf('data:') === 0; });
+    if (!toMigrate.length) { cb(lamp); return; }
+    var result  = imgs.slice();
+    var pending = 0;
+    imgs.forEach(function(src, i) {
+      if (src && src.indexOf('data:') === 0) {
+        pending++;
+        uploadToCloudinary(src, function(url) {
+          if (url) result[i] = url;
+          pending--;
+          if (pending === 0) {
+            var idx = lamps.findIndex(function(l) { return String(l.id) === String(lamp.id); });
+            if (idx !== -1) lamps[idx] = Object.assign({}, lamps[idx], { images: result });
+            cb(Object.assign({}, lamp, { images: result }));
+          }
+        });
+      }
+    });
+  }
+
   /* ─── Photo handling ─── */
   function compressImage(dataUrl, maxW, quality, cb) {
     const img = new Image();
@@ -1337,22 +1379,37 @@
   }
 
   function handlePhotos(input) {
-    const files = Array.from(input.files);
-    const MAX_PHOTOS = 20;
-    if (currentImages.length + files.length > MAX_PHOTOS) {
-      showToast('⚠️ Maximum ' + MAX_PHOTOS + ' photos par lampe');
+    const files    = Array.from(input.files);
+    const MAX      = 8;
+    var toProcess  = files.slice(0, MAX - currentImages.length);
+    if (!toProcess.length) {
+      if (files.length) showToast('⚠️ Maximum ' + MAX + ' photos par lampe');
+      input.value = ''; return;
     }
-    var toProcess = files.slice(0, MAX_PHOTOS - currentImages.length);
-    toProcess.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        compressImage(e.target.result, 480, 0.5, function(compressed) {
-          currentImages.push(compressed);
-          renderThumbs();
-          updatePreview();
-        });
-      };
-      reader.readAsDataURL(file);
+    var pending   = toProcess.length;
+    var successes = 0;
+    showToast('⏳ Upload ' + pending + ' photo(s)…');
+
+    function onDone(src) {
+      if (src) { currentImages.push(src); successes++; }
+      pending--;
+      renderThumbs(); updatePreview();
+      if (pending === 0) {
+        if (successes > 0) showToast('✅ ' + successes + ' photo(s) ajoutée(s)');
+        else showToast('❌ Upload échoué — vérifiez la connexion');
+      }
+    }
+
+    toProcess.forEach(function(file) {
+      uploadToCloudinary(file, function(url) {
+        if (url) { onDone(url); return; }
+        /* Fallback local si Cloudinary inaccessible */
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          compressImage(e.target.result, 480, 0.5, function(c) { onDone(c); });
+        };
+        reader.readAsDataURL(file);
+      });
     });
     input.value = '';
   }
