@@ -1304,7 +1304,7 @@
     toProcess.forEach(file => {
       const reader = new FileReader();
       reader.onload = function(e) {
-        compressImage(e.target.result, 800, 0.7, function(compressed) {
+        compressImage(e.target.result, 480, 0.5, function(compressed) {
           currentImages.push(compressed);
           renderThumbs();
           updatePreview();
@@ -1315,14 +1315,8 @@
     input.value = '';
   }
 
-  var deletedStorageImages = [];
-
   function removePhoto(idx) {
-    var removed = currentImages.splice(idx, 1)[0];
-    // Si c'est une URL Storage, la marquer pour suppression différée
-    if (removed && !isBase64Image(removed) && removed.indexOf('firebasestorage') !== -1) {
-      deletedStorageImages.push(removed);
-    }
+    currentImages.splice(idx, 1);
     renderThumbs();
     updatePreview();
   }
@@ -1433,48 +1427,23 @@
 
     var lampId = editingId !== null ? editingId : nextId();
 
-    // Désactiver le bouton pendant l'upload
     var saveBtn = document.querySelector('.modal-footer .btn-primary');
-    if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Envoi des photos…'; }
+    if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Sauvegarde…'; }
 
-    // Upload des images base64 vers Firebase Storage
-    var hasBase64 = currentImages.some(function(s) { return isBase64Image(s); });
-
-    function finalizeSave(finalImages) {
-      if (editingId !== null) {
-        var idx = lamps.findIndex(function(l) { return l.id === editingId; });
-        if (idx !== -1) {
-          lamps[idx] = Object.assign({}, lamps[idx], { name: name, category: category, price: price, badge: badge, badgeNew: isNew, desc: desc, comment: comment, images: finalImages });
-        }
-      } else {
-        lamps.push({ id: lampId, name: name, category: category, price: price, badge: badge, badgeNew: isNew, desc: desc, comment: comment, images: finalImages, image: '' });
+    if (editingId !== null) {
+      var idx = lamps.findIndex(function(l) { return l.id === editingId; });
+      if (idx !== -1) {
+        lamps[idx] = Object.assign({}, lamps[idx], { name: name, category: category, price: price, badge: badge, badgeNew: isNew, desc: desc, comment: comment, images: currentImages.slice() });
       }
-
-      // Supprimer les images Storage marquées pour suppression
-      if (deletedStorageImages.length && typeof fsStoragePathFromUrl === 'function') {
-        deletedStorageImages.forEach(function(url) {
-          var path = fsStoragePathFromUrl(url);
-          if (path && typeof fsDeleteSingleImage === 'function') fsDeleteSingleImage(path, function() {});
-        });
-        deletedStorageImages = [];
-      }
-
-      saveLamps(function() {
-        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Enregistrer'; }
-        showToast(editingId !== null ? 'Lampe modifiée avec succès !' : 'Lampe ajoutée avec succès !');
-        renderGrid();
-        closeModal();
-      });
-    }
-
-    if (hasBase64 && typeof fsUploadAllImages === 'function') {
-      showToast('📷 Envoi des photos vers le cloud…');
-      fsUploadAllImages(lampId, currentImages.slice(), function(uploadedImages) {
-        finalizeSave(uploadedImages);
-      });
     } else {
-      finalizeSave(currentImages.slice());
+      lamps.push({ id: lampId, name: name, category: category, price: price, badge: badge, badgeNew: isNew, desc: desc, comment: comment, images: currentImages.slice(), image: '' });
     }
+
+    saveLamps(function() {
+      if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Enregistrer'; }
+      renderGrid();
+      closeModal();
+    });
   }
 
   /* ─── Delete ─── */
@@ -1539,7 +1508,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
-<script src="js/firebase-config.js?v=4"></script>
+<script src="js/firebase-config.js?v=5"></script>
 </body>
 </html>
