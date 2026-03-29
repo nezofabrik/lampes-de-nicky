@@ -494,7 +494,7 @@ function initPaymentTabs() {
 
 // ── EMAIL NOTIFICATION (Web3Forms) ────────────────────
 
-const WEB3FORMS_KEY = 'VOTRE_CLE_WEB3FORMS'; // → obtenir sur web3forms.com
+const WEB3FORMS_KEY = '074d08b5-9618-4776-9690-902f65863550';
 
 function sendOrderEmail(order) {
   if (!WEB3FORMS_KEY || WEB3FORMS_KEY === 'VOTRE_CLE_WEB3FORMS') return;
