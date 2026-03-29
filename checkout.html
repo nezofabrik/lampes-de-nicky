@@ -82,6 +82,42 @@
       max-width: 440px;
       margin: 0 auto 2rem;
     }
+    .how-it-works {
+      background: rgba(17,100,102,0.06);
+      border: 1.5px solid rgba(17,100,102,0.18);
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+      margin-bottom: 1.5rem;
+    }
+    .how-it-works h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      color: var(--teal);
+      margin-bottom: 0.75rem;
+    }
+    .how-steps {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .how-steps li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7rem;
+      font-size: 0.83rem;
+      color: var(--dark);
+      line-height: 1.5;
+    }
+    .how-steps .step-dot {
+      width: 22px; height: 22px;
+      background: var(--teal);
+      color: white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 700;
+      flex-shrink: 0; margin-top: 1px;
+    }
     .livraison-note {
       background: rgba(17,100,102,0.07);
       border-left: 3px solid var(--teal);
@@ -152,16 +188,11 @@
     <div class="step-sep"></div>
     <div class="step active">
       <div class="step-num">2</div>
-      <span>Livraison</span>
+      <span>Commande</span>
     </div>
     <div class="step-sep"></div>
     <div class="step">
       <div class="step-num">3</div>
-      <span>Paiement</span>
-    </div>
-    <div class="step-sep"></div>
-    <div class="step">
-      <div class="step-num">4</div>
       <span>Confirmation</span>
     </div>
   </div>
@@ -178,12 +209,13 @@
           <polyline points="20 6 9 17 4 12"/>
         </svg>
       </div>
-      <h2>Commande confirmée !</h2>
+      <h2>Demande envoyée !</h2>
       <p>
-        Merci pour votre commande. Je prépare votre lampe avec soin dans mon atelier.<br>
-        Vous recevrez un email de confirmation sous peu.
+        Merci pour votre confiance.<br>
+        Nicky vous contactera sous 24h à l'adresse email que vous avez indiquée pour confirmer votre commande et convenir du paiement.
       </p>
-      <a href="articles.html" class="btn btn-teal">Continuer mes achats</a>
+      <p style="font-size:0.85rem; color:var(--muted); margin-top:-0.5rem;">Paiement possible par virement bancaire, TWINT ou PayPal.</p>
+      <a href="articles.html" class="btn btn-teal" style="margin-top:1rem;">Retour à la boutique</a>
     </div>
 
     <!-- CHECKOUT LAYOUT -->
@@ -217,21 +249,31 @@
             </div>
           </div>
 
+          <!-- Comment ça marche -->
+          <div class="how-it-works">
+            <h4>Comment fonctionne la commande ?</h4>
+            <ul class="how-steps">
+              <li><span class="step-dot">1</span><span>Remplissez ce formulaire et envoyez votre demande.</span></li>
+              <li><span class="step-dot">2</span><span>Nicky vous contacte sous 24h pour confirmer et convenir du paiement (virement, TWINT ou PayPal).</span></li>
+              <li><span class="step-dot">3</span><span>Dès le paiement reçu, votre lampe est préparée et expédiée avec soin.</span></li>
+            </ul>
+          </div>
+
           <!-- Formulaire -->
           <form id="checkout-form" novalidate>
 
-            <!-- Livraison -->
+            <!-- Coordonnées -->
             <div class="checkout-block">
               <h3>
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8Z"/>
                   <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
                 </svg>
-                Adresse de livraison
+                Vos coordonnées &amp; livraison
               </h3>
 
               <div class="livraison-note">
-                Livraison offerte dès 80 CHF d'achat · Délai : 5 à 10 jours ouvrés (pièces faites à la main)
+                Livraison offerte dès 80 CHF · Délai : 5 à 10 jours ouvrés (pièces faites à la main)
               </div>
 
               <div class="form-row">
@@ -246,19 +288,24 @@
               </div>
 
               <div class="form-group">
-                <label for="ship-email">Email *</label>
+                <label for="ship-email">Email * <span style="font-weight:400;color:var(--muted)">(Nicky vous répondra ici)</span></label>
                 <input type="email" id="ship-email" placeholder="votre@email.ch" required>
               </div>
 
               <div class="form-group">
-                <label for="ship-adresse">Adresse *</label>
+                <label for="ship-tel">Téléphone</label>
+                <input type="tel" id="ship-tel" placeholder="+41 79 000 00 00">
+              </div>
+
+              <div class="form-group">
+                <label for="ship-adresse">Adresse de livraison *</label>
                 <input type="text" id="ship-adresse" placeholder="Numéro et nom de rue" required>
               </div>
 
               <div class="form-row">
                 <div class="form-group">
                   <label for="ship-cp">Code postal *</label>
-                  <input type="text" id="ship-cp" placeholder="75000" required>
+                  <input type="text" id="ship-cp" placeholder="1000" required>
                 </div>
                 <div class="form-group">
                   <label for="ship-ville">Ville *</label>
@@ -274,116 +321,28 @@
                   <option value="be">Belgique</option>
                   <option value="lu">Luxembourg</option>
                   <option value="de">Allemagne</option>
-                  <option value="es">Espagne</option>
                   <option value="it">Italie</option>
                   <option value="other">Autre pays</option>
                 </select>
               </div>
-            </div>
 
-            <!-- Paiement -->
-            <div class="checkout-block">
-              <h3>
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
-                </svg>
-                Paiement sécurisé
-              </h3>
-
-              <!-- Méthodes visuelles -->
-              <div class="payment-methods">
-                <div class="pay-method active" data-method="card">Carte bancaire</div>
-                <div class="pay-method" data-method="paypal">PayPal</div>
-                <div class="pay-method" data-method="virement">Virement</div>
-              </div>
-
-              <!-- Carte bancaire -->
-              <div data-payment-form="card">
-                <!-- Carte visuelle interactive -->
-                <div class="card-visual">
-                  <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <div class="card-chip"></div>
-                    <svg width="36" height="24" viewBox="0 0 36 24" fill="none" opacity="0.7">
-                      <circle cx="14" cy="12" r="10" fill="#D9B08C" opacity="0.9"/>
-                      <circle cx="22" cy="12" r="10" fill="#FFCB9A" opacity="0.7"/>
-                    </svg>
-                  </div>
-                  <div class="card-number" id="card-number-display">•••• •••• •••• ••••</div>
-                  <div class="card-details">
-                    <div>
-                      <div style="opacity:0.6; font-size:0.65rem; margin-bottom:2px;">Titulaire</div>
-                      <div id="card-name-display">VOTRE NOM</div>
-                    </div>
-                    <div style="text-align:right;">
-                      <div style="opacity:0.6; font-size:0.65rem; margin-bottom:2px;">Expire</div>
-                      <div id="card-exp-display">MM/AA</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label for="card-name">Nom sur la carte *</label>
-                  <input type="text" id="card-name" placeholder="PRÉNOM NOM" style="text-transform:uppercase;" required>
-                </div>
-
-                <div class="form-group">
-                  <label for="card-number">Numéro de carte *</label>
-                  <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19" required>
-                </div>
-
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="card-exp">Date d'expiration *</label>
-                    <input type="text" id="card-exp" placeholder="MM/AA" maxlength="5" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="card-cvv">CVV *</label>
-                    <input type="text" id="card-cvv" placeholder="•••" maxlength="4" required>
-                  </div>
-                </div>
-              </div>
-
-              <!-- PayPal -->
-              <div data-payment-form="paypal" style="display:none; text-align:center; padding: 2rem 1rem;">
-                <svg width="120" height="40" viewBox="0 0 120 40" fill="none">
-                  <text y="30" font-family="Arial" font-weight="bold" font-size="24" fill="#003087">Pay</text>
-                  <text x="44" y="30" font-family="Arial" font-weight="bold" font-size="24" fill="#009cde">Pal</text>
-                </svg>
-                <p style="color:var(--muted); font-size:0.9rem; margin-top:1rem;">Vous serez redirigé vers PayPal pour finaliser le paiement en toute sécurité.</p>
-              </div>
-
-              <!-- Virement -->
-              <div data-payment-form="virement" style="display:none; padding: 1rem 0;">
-                <div style="background: var(--mint); border-radius:4px; padding: 1.2rem 1.5rem;">
-                  <p style="font-size:0.85rem; color:var(--dark); line-height:1.8;">
-                    <strong>IBAN :</strong> FR76 XXXX XXXX XXXX XXXX XXXX XXX<br>
-                    <strong>BIC :</strong> XXXXXXXX<br>
-                    <strong>Référence :</strong> Votre prénom + nom<br>
-                    <br>
-                    <span style="color:var(--muted); font-size:0.8rem;">Votre commande sera traitée dès réception du virement (2–3 jours ouvrés).</span>
-                  </p>
-                </div>
-              </div>
-
-              <div class="secure-badge" style="margin-top:1rem;">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                </svg>
-                Paiement 100% sécurisé · Données chiffrées SSL
+              <div class="form-group">
+                <label for="ship-message">Message ou questions <span style="font-weight:400;color:var(--muted)">(facultatif)</span></label>
+                <textarea id="ship-message" placeholder="Questions sur la lampe, préférences de livraison…" rows="3" style="width:100%;resize:vertical;"></textarea>
               </div>
             </div>
 
-            <!-- CGV + Bouton -->
+            <!-- Bouton -->
             <div class="checkout-block">
               <div class="cgv-check">
                 <input type="checkbox" id="cgv" required>
                 <label for="cgv">
-                  J'accepte les <a href="#">conditions générales de vente</a> et la <a href="#">politique de confidentialité</a> des Lampes de Nicky.
+                  J'accepte que mes coordonnées soient utilisées pour traiter ma commande conformément à la politique de confidentialité des Lampes de Nicky.
                 </label>
               </div>
 
               <button type="submit" class="btn btn-teal" style="width:100%; font-size:0.95rem; padding:1.1rem; justify-content:center;">
-                Confirmer ma commande →
+                Envoyer ma commande →
               </button>
 
               <div style="text-align:center; margin-top:1rem;">

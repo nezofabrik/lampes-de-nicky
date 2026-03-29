@@ -148,13 +148,13 @@ function saveCart(cart) {
   localStorage.setItem(CART_KEY, JSON.stringify(cart));
 }
 
-function addToCart(id, name, price, category) {
+function addToCart(id, name, price, category, image) {
   const cart = getCart();
   const existing = cart.find(i => i.id === id);
   if (existing) {
     existing.qty += 1;
   } else {
-    cart.push({ id, name, price, category, qty: 1 });
+    cart.push({ id, name, price, category, image: image || '', qty: 1 });
   }
   saveCart(cart);
   updateCartCount();
@@ -233,14 +233,14 @@ function renderCart() {
 
   listEl.innerHTML = cart.map(item => `
     <div class="cart-item">
-      <div class="cart-item-thumb ph-${item.category || 'table'}">
-        <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:0.4">
-          <path d="M9 2L5 9h14L15 2H9z"/><line x1="12" y1="9" x2="12" y2="16"/>
-          <ellipse cx="12" cy="18" rx="5" ry="2"/>
-        </svg>
+      <div class="cart-item-thumb ph-${item.category || 'suspension'}">
+        ${item.image
+          ? `<img src="${item.image}" alt="${escapeHtml(item.name)}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">`
+          : `<svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:0.4"><path d="M9 2L5 9h14L15 2H9z"/><line x1="12" y1="9" x2="12" y2="16"/><ellipse cx="12" cy="18" rx="5" ry="2"/></svg>`
+        }
       </div>
       <div class="cart-item-details">
-        <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-name">${escapeHtml(item.name)}</div>
         <div class="cart-item-cat">${formatCat(item.category)}</div>
         <div class="cart-item-qty">
           <button class="qty-btn" onclick="updateQty('${item.id}', -1)">−</button>
@@ -429,7 +429,9 @@ function initAddToCartButtons() {
       const name     = card.dataset.name;
       const price    = parseFloat(card.dataset.price);
       const category = card.dataset.category || '';
-      addToCart(id, name, price, category);
+      const imgEl    = card.querySelector('.product-photo');
+      const image    = imgEl ? imgEl.src : '';
+      addToCart(id, name, price, category, image);
       burstCart(btn);
       btn.textContent = '✓ Ajoutée';
       btn.classList.add('added');
@@ -490,6 +492,44 @@ function initPaymentTabs() {
   });
 }
 
+// ── EMAIL NOTIFICATION (Web3Forms) ────────────────────
+
+const WEB3FORMS_KEY = 'VOTRE_CLE_WEB3FORMS'; // → obtenir sur web3forms.com
+
+function sendOrderEmail(order) {
+  if (!WEB3FORMS_KEY || WEB3FORMS_KEY === 'VOTRE_CLE_WEB3FORMS') return;
+  const items = order.items.map(i => `• ${i.name} × ${i.qty} — ${i.price * i.qty} CHF`).join('\n');
+  const body = [
+    `Nouvelle commande — Les Lampes de Nicky`,
+    ``,
+    `Client : ${order.prenom} ${order.nom}`,
+    `Email  : ${order.email}`,
+    `Tél    : ${order.tel || '—'}`,
+    ``,
+    `Adresse : ${order.adresse}, ${order.cp} ${order.ville} (${order.pays})`,
+    ``,
+    `Articles :`,
+    items,
+    ``,
+    `Sous-total : ${order.total} CHF`,
+    `Livraison  : ${order.shipping === 0 ? 'Offerte' : order.shipping + ' CHF'}`,
+    ``,
+    order.message ? `Message client : ${order.message}` : ''
+  ].filter(l => l !== undefined).join('\n');
+
+  fetch('https://api.web3forms.com/submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      access_key: WEB3FORMS_KEY,
+      subject: `🛒 Nouvelle commande — ${order.prenom} ${order.nom} (${order.total} CHF)`,
+      message: body,
+      from_name: 'Les Lampes de Nicky',
+      replyto: order.email
+    })
+  }).catch(function() {}); // silencieux — ne bloque pas la commande
+}
+
 // ── CHECKOUT FORM ─────────────────────────────────────
 
 function initCheckoutForm() {
@@ -501,16 +541,46 @@ function initCheckoutForm() {
     if (!cart.length) { showToast('Votre panier est vide !'); return; }
 
     const btn = form.querySelector('[type="submit"]');
-    btn.textContent = 'Traitement en cours…';
+    btn.textContent = 'Envoi en cours…';
     btn.disabled = true;
 
-    setTimeout(() => {
-      saveCart([]);
-      updateCartCount();
-      document.getElementById('checkout-success').style.display = 'block';
-      document.getElementById('checkout-form-wrapper').style.display = 'none';
-      document.getElementById('cart-block').style.display = 'none';
-    }, 1800);
+    const get = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+    const order = {
+      prenom:  get('ship-prenom'),
+      nom:     get('ship-nom'),
+      email:   get('ship-email'),
+      tel:     get('ship-tel'),
+      adresse: get('ship-adresse'),
+      cp:      get('ship-cp'),
+      ville:   get('ship-ville'),
+      pays:    get('ship-pays'),
+      message: get('ship-message'),
+      items:   cart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty, category: i.category })),
+      total:   cartTotal(),
+      shipping: cartTotal() >= 80 ? 0 : 8.9
+    };
+
+    function onSaved(ok) {
+      if (ok) {
+        sendOrderEmail(order);
+        saveCart([]);
+        updateCartCount();
+        document.getElementById('checkout-success').style.display = 'block';
+        document.getElementById('checkout-form-wrapper').style.display = 'none';
+        document.getElementById('cart-block').style.display = 'none';
+      } else {
+        showToast('❌ Erreur lors de l\'envoi. Réessayez.');
+        btn.textContent = 'Envoyer ma commande →';
+        btn.disabled = false;
+      }
+    }
+
+    if (typeof fsSaveOrder === 'function') {
+      fsSaveOrder(order, onSaved);
+    } else {
+      // Fallback si Firebase pas disponible
+      setTimeout(() => onSaved(true), 800);
+    }
   });
 }
 

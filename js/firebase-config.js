@@ -106,3 +106,39 @@ function fsDeleteAllLamps(cb) {
 function isBase64Image(str) {
   return typeof str === 'string' && str.indexOf('data:') === 0;
 }
+
+/* ─── Commandes ─── */
+
+/* Enregistre une commande */
+function fsSaveOrder(order, cb) {
+  var fs = getFS();
+  if (!fs) { if(cb) cb(false); return; }
+  var doc = Object.assign({}, order, {
+    status: 'nouveau',
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  fs.collection('orders').add(doc)
+    .then(function() { if(cb) cb(true); })
+    .catch(function(e) { console.error('fsSaveOrder:', e); if(cb) cb(false); });
+}
+
+/* Lit toutes les commandes (admin seulement) */
+function fsGetOrders(cb) {
+  var fs = getFS();
+  if (!fs) { cb(null); return; }
+  fs.collection('orders').orderBy('createdAt', 'desc').get()
+    .then(function(snap) {
+      var arr = snap.docs.map(function(d) { return Object.assign({ _id: d.id }, d.data()); });
+      cb(arr);
+    })
+    .catch(function(e) { console.warn('fsGetOrders:', e); cb(null); });
+}
+
+/* Met à jour le statut d'une commande */
+function fsUpdateOrderStatus(orderId, status, cb) {
+  var fs = getFS();
+  if (!fs) { if(cb) cb(false); return; }
+  fs.collection('orders').doc(orderId).update({ status: status })
+    .then(function() { if(cb) cb(true); })
+    .catch(function() { if(cb) cb(false); });
+}

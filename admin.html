@@ -797,30 +797,55 @@
   <!-- Body -->
   <div class="admin-body">
 
-    <!-- Toolbar -->
-    <div class="admin-toolbar">
-      <div class="admin-toolbar-left">
-        <h2>Gestion du catalogue</h2>
-        <p>Bienvenue dans votre espace de gestion. Ajoutez, modifiez ou supprimez vos lampes facilement.</p>
-      </div>
-      <div class="admin-toolbar-right">
-        <button class="btn btn-danger" onclick="resetCatalogue()">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
-          </svg>
-          Réinitialiser
-        </button>
-        <button class="btn btn-add" onclick="openModal(null)">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          Ajouter une lampe
-        </button>
-      </div>
+    <!-- Tabs -->
+    <div style="display:flex;gap:0;border-bottom:2px solid var(--mint);margin-bottom:1.5rem;">
+      <button id="tab-catalogue" onclick="switchTab('catalogue')" style="padding:0.7rem 1.4rem;font-family:'Raleway',sans-serif;font-size:0.85rem;font-weight:700;border:none;background:none;cursor:pointer;border-bottom:2px solid var(--teal);margin-bottom:-2px;color:var(--teal);">Catalogue</button>
+      <button id="tab-orders" onclick="switchTab('orders')" style="padding:0.7rem 1.4rem;font-family:'Raleway',sans-serif;font-size:0.85rem;font-weight:700;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;color:var(--muted);">Commandes <span id="orders-badge" style="display:none;background:var(--teal);color:white;border-radius:10px;padding:1px 6px;font-size:0.72rem;margin-left:4px;">0</span></button>
     </div>
 
-    <!-- Lamps Grid -->
-    <div id="lamps-grid"></div>
+    <!-- Tab Catalogue -->
+    <div id="panel-catalogue">
+      <div class="admin-toolbar">
+        <div class="admin-toolbar-left">
+          <h2>Gestion du catalogue</h2>
+          <p>Ajoutez, modifiez ou supprimez vos lampes facilement.</p>
+        </div>
+        <div class="admin-toolbar-right">
+          <button class="btn btn-danger" onclick="resetCatalogue()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
+            </svg>
+            Réinitialiser
+          </button>
+          <button class="btn btn-add" onclick="openModal(null)">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Ajouter une lampe
+          </button>
+        </div>
+      </div>
+      <div id="lamps-grid"></div>
+    </div>
+
+    <!-- Tab Commandes -->
+    <div id="panel-orders" style="display:none;">
+      <div class="admin-toolbar">
+        <div class="admin-toolbar-left">
+          <h2>Commandes reçues</h2>
+          <p>Toutes les demandes envoyées via le formulaire de commande.</p>
+        </div>
+        <div class="admin-toolbar-right">
+          <button class="btn" onclick="loadOrders()" style="background:var(--mint);color:var(--dark);">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
+            </svg>
+            Actualiser
+          </button>
+        </div>
+      </div>
+      <div id="orders-list" style="display:flex;flex-direction:column;gap:1rem;"></div>
+    </div>
 
   </div>
 </div>
@@ -1586,6 +1611,84 @@
     t.textContent = msg;
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  /* ─── Tabs ─── */
+  function switchTab(tab) {
+    document.getElementById('panel-catalogue').style.display = tab === 'catalogue' ? '' : 'none';
+    document.getElementById('panel-orders').style.display    = tab === 'orders'    ? '' : 'none';
+    document.getElementById('tab-catalogue').style.borderBottomColor = tab === 'catalogue' ? 'var(--teal)' : 'transparent';
+    document.getElementById('tab-catalogue').style.color = tab === 'catalogue' ? 'var(--teal)' : 'var(--muted)';
+    document.getElementById('tab-orders').style.borderBottomColor    = tab === 'orders'    ? 'var(--teal)' : 'transparent';
+    document.getElementById('tab-orders').style.color    = tab === 'orders'    ? 'var(--teal)' : 'var(--muted)';
+    if (tab === 'orders') loadOrders();
+  }
+
+  /* ─── Orders ─── */
+  var ordersData = [];
+
+  function loadOrders() {
+    var el = document.getElementById('orders-list');
+    el.innerHTML = '<p style="color:var(--muted);padding:1rem;">Chargement…</p>';
+    if (typeof fsGetOrders !== 'function') {
+      el.innerHTML = '<p style="color:var(--muted);padding:1rem;">Firebase non disponible.</p>'; return;
+    }
+    fsGetOrders(function(arr) {
+      ordersData = arr || [];
+      renderOrders();
+      var newCount = ordersData.filter(function(o) { return o.status === 'nouveau'; }).length;
+      var badge = document.getElementById('orders-badge');
+      if (newCount > 0) { badge.textContent = newCount; badge.style.display = ''; }
+      else { badge.style.display = 'none'; }
+    });
+  }
+
+  function renderOrders() {
+    var el = document.getElementById('orders-list');
+    if (!ordersData.length) {
+      el.innerHTML = '<p style="color:var(--muted);padding:1rem;text-align:center;">Aucune commande pour l\'instant.</p>'; return;
+    }
+    el.innerHTML = ordersData.map(function(o) {
+      var date = o.createdAt && o.createdAt.toDate ? o.createdAt.toDate().toLocaleDateString('fr-CH', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+      var items = (o.items || []).map(function(i) { return i.name + ' × ' + i.qty; }).join(', ');
+      var statusColor = { nouveau: '#116466', confirme: '#2d8a5a', envoye: '#6b7280', annule: '#c0392b' }[o.status] || '#6b7280';
+      var statusLabel = { nouveau: 'Nouveau', confirme: 'Confirmé', envoye: 'Expédié', annule: 'Annulé' }[o.status] || o.status;
+      return '<div style="background:white;border-radius:12px;padding:1.2rem 1.4rem;box-shadow:0 2px 8px rgba(0,0,0,0.07);border-left:4px solid ' + statusColor + ';">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;">' +
+          '<div>' +
+            '<div style="font-weight:700;font-size:1rem;">' + (o.prenom||'') + ' ' + (o.nom||'') + '</div>' +
+            '<div style="font-size:0.82rem;color:var(--muted);">' + date + ' · ' + (o.email||'') + (o.tel ? ' · ' + o.tel : '') + '</div>' +
+          '</div>' +
+          '<div style="display:flex;align-items:center;gap:0.5rem;">' +
+            '<span style="background:' + statusColor + ';color:white;border-radius:20px;padding:3px 10px;font-size:0.75rem;font-weight:700;">' + statusLabel + '</span>' +
+            '<strong style="font-size:1rem;">' + ((o.total||0) + (o.shipping||0)).toFixed(0) + ' CHF</strong>' +
+          '</div>' +
+        '</div>' +
+        '<div style="margin-top:0.7rem;font-size:0.85rem;color:var(--dark);">' + items + '</div>' +
+        (o.adresse ? '<div style="font-size:0.8rem;color:var(--muted);margin-top:0.3rem;">' + o.adresse + ', ' + (o.cp||'') + ' ' + (o.ville||'') + ' (' + (o.pays||'').toUpperCase() + ')</div>' : '') +
+        (o.message ? '<div style="margin-top:0.5rem;font-size:0.82rem;font-style:italic;color:var(--teal);">💬 ' + o.message + '</div>' : '') +
+        '<div style="display:flex;gap:0.5rem;margin-top:0.9rem;flex-wrap:wrap;">' +
+          '<a href="mailto:' + (o.email||'') + '?subject=Votre commande — Les Lampes de Nicky" class="btn" style="font-size:0.78rem;padding:0.4rem 0.8rem;background:var(--teal);color:white;text-decoration:none;">Répondre</a>' +
+          (o.status !== 'confirme'  ? '<button onclick="updateOrderStatus(\'' + o._id + '\',\'confirme\')"  class="btn" style="font-size:0.78rem;padding:0.4rem 0.8rem;background:var(--mint);color:var(--dark);">Marquer confirmé</button>' : '') +
+          (o.status !== 'envoye'    ? '<button onclick="updateOrderStatus(\'' + o._id + '\',\'envoye\')"    class="btn" style="font-size:0.78rem;padding:0.4rem 0.8rem;background:#e8f8f0;color:#2d8a5a;">Marquer expédié</button>' : '') +
+          (o.status !== 'annule'    ? '<button onclick="updateOrderStatus(\'' + o._id + '\',\'annule\')"    class="btn" style="font-size:0.78rem;padding:0.4rem 0.8rem;background:#fde;color:var(--red);">Annuler</button>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function updateOrderStatus(orderId, status) {
+    if (typeof fsUpdateOrderStatus !== 'function') return;
+    fsUpdateOrderStatus(orderId, status, function(ok) {
+      if (ok) {
+        var o = ordersData.find(function(x) { return x._id === orderId; });
+        if (o) o.status = status;
+        renderOrders();
+        showToast('Statut mis à jour.');
+      } else {
+        showToast('❌ Erreur lors de la mise à jour.');
+      }
+    });
   }
 
   /* ─── Sign out ─── */
