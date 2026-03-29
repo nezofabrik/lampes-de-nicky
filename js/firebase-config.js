@@ -87,7 +87,11 @@ function fsSaveLamp(lamp, cb) {
 
   fs.collection('lamps').doc(String(lamp.id)).set(lamp)
     .then(function() { if(cb) cb(true); })
-    .catch(function(e) { console.error('fsSaveLamp:', e); if(cb) cb(false); });
+    .catch(function(e) {
+      console.error('fsSaveLamp:', e.code, e.message);
+      var reason = e.code === 'permission-denied' ? 'not_auth' : (e.message || 'erreur');
+      if(cb) cb(false, reason);
+    });
 }
 
 /* Supprime une lampe */

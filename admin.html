@@ -1139,12 +1139,18 @@
           if (!ok) {
             errors++;
             if (reason === 'too_large') {
-              showToast('⚠️ Photos trop lourdes pour le cloud — réduire à max 8 photos par lampe');
+              showToast('⚠️ Photos trop lourdes — compresse ou réduis le nombre de photos');
+            } else if (reason === 'not_auth') {
+              showToast('❌ Non connecté — veuillez vous reconnecter');
+            } else {
+              showToast('❌ Erreur cloud: ' + (reason || 'inconnue'));
             }
           }
           done++;
           if (done === lamps.length) {
-            if (errors > 0 && errors < lamps.length) showToast('⚠️ Certaines lampes non synchronisées (trop de photos)');
+            if (errors === 0) showToast('✅ ' + lamps.length + ' lampe(s) sauvegardée(s) dans le cloud');
+            else if (errors < lamps.length) showToast('⚠️ ' + (lamps.length - errors) + '/' + lamps.length + ' lampes synchronisées');
+            else showToast('❌ Échec sauvegarde cloud — lampes en local uniquement');
             if (cb) cb();
           }
         });
