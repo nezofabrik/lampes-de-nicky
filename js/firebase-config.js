@@ -20,6 +20,9 @@ function _initApp() {
   }
 }
 
+/* Auto-init dès que le script est chargé */
+_initApp();
+
 function getFS() {
   if (_fsDB) return _fsDB;
   try {
