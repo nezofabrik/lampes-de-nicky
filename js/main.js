@@ -693,13 +693,12 @@ function removeFireflies() {
 function initDarkTeaser() {
   const teaser = document.getElementById('dark-teaser');
   if (!teaser) return;
-  // Ne montrer que si le mode sombre n'a jamais été activé
+  // Ne montrer que si on n'est pas déjà en mode sombre
   if (localStorage.getItem('nicky_theme') === 'dark') return;
-  if (localStorage.getItem('nicky_teaser_seen')) return;
   if (document.documentElement.getAttribute('data-theme') === 'dark') return;
 
   setTimeout(() => { teaser.classList.add('visible'); }, 2000);
-  setTimeout(() => { hideDarkTeaser(); }, 14000);
+  setTimeout(() => { hideDarkTeaser(); }, 22000);
 }
 
 function hideDarkTeaser() {
@@ -707,8 +706,7 @@ function hideDarkTeaser() {
   if (!teaser) return;
   teaser.classList.remove('visible');
   teaser.classList.add('hiding');
-  localStorage.setItem('nicky_teaser_seen', '1');
-  setTimeout(() => teaser.remove(), 400);
+  setTimeout(() => teaser.classList.remove('hiding'), 400);
 }
 
 // ── PRODUCT DETAIL MODAL ──────────────────────────────
