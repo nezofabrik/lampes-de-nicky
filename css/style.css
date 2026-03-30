@@ -2189,7 +2189,7 @@ body { transition: color 0.35s ease; }
 =========================== */
 .lamp-hint {
   position: absolute;
-  top: calc(100% + 22px);
+  top: calc(100% + 52px);
   left: 50%;
   transform: translateX(calc(-50% - 28px));
   display: flex;
