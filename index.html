@@ -431,109 +431,14 @@
 <script src="js/firebase-config.js?v=5"></script>
 <script src="js/main.js?v=3"></script>
 
-<!-- ═══ ÉDITEUR HINT — TEMPORAIRE ═══ -->
-<div id="hint-editor" style="position:fixed;top:160px;right:200px;z-index:99999;user-select:none;">
-  <!-- Texte -->
-  <p id="hint-label" style="font-family:'Caveat',cursive;font-size:1.2rem;font-weight:700;color:#FFCB9A;margin:0 0 4px 0;text-shadow:0 2px 8px rgba(0,0,0,0.8);transform:rotate(-3deg);cursor:grab;">
-    "essaie le mode nuit !"
-  </p>
-  <!-- SVG + poignées -->
-  <div style="position:relative;width:200px;height:90px;">
-    <svg id="hint-svg" viewBox="0 0 200 90" width="200" height="90" fill="none" style="overflow:visible;display:block;">
-      <!-- Lignes de contrôle (pointillées) -->
-      <line id="cl1" stroke="#ffd93d" stroke-width="1" stroke-dasharray="3,3" opacity="0.6"/>
-      <line id="cl2" stroke="#6bcb77" stroke-width="1" stroke-dasharray="3,3" opacity="0.6"/>
-      <!-- Courbe principale -->
-      <path id="hint-curve" stroke="#FFCB9A" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-      <!-- Pointe flèche -->
-      <path id="hint-h1" stroke="#FFCB9A" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-      <path id="hint-h2" stroke="#FFCB9A" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-    </svg>
-    <!-- Poignées (rouge=départ, jaune=ctrl1, vert=ctrl2, bleu=pointe) -->
-    <div class="hh" id="hh0" data-i="0" style="background:#ff6b6b;" title="Départ"></div>
-    <div class="hh" id="hh1" data-i="1" style="background:#ffd93d;" title="Contrôle 1"></div>
-    <div class="hh" id="hh2" data-i="2" style="background:#6bcb77;" title="Contrôle 2"></div>
-    <div class="hh" id="hh3" data-i="3" style="background:#4d96ff;" title="Pointe flèche"></div>
-  </div>
-  <!-- Panneau infos -->
-  <div style="background:rgba(0,0,0,0.88);color:#fff;padding:8px 12px;border-radius:8px;margin-top:6px;font-family:monospace;font-size:11px;line-height:1.9;">
-    <div>🔴 départ &nbsp;🟡 ctrl1 &nbsp;🟢 ctrl2 &nbsp;🔵 pointe</div>
-    <div id="info-pos" style="color:#FFCB9A;"></div>
-    <div id="info-path" style="color:#aaa;font-size:10px;word-break:break-all;"></div>
-    <button onclick="(function(){var t=document.getElementById('info-pos').textContent+' | '+document.getElementById('info-path').textContent;navigator.clipboard.writeText(t);alert('Copié !');})()" style="margin-top:6px;background:#FFCB9A;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:700;">📋 Copier la config</button>
-  </div>
+<!-- Hint mode nuit — position calibrée -->
+<div class="lamp-hint" id="lamp-hint" aria-hidden="true">
+  <p class="lamp-hint-text">"essaie le mode nuit !"</p>
+  <svg class="lamp-hint-arrow" viewBox="0 0 200 90" fill="none" style="overflow:visible;">
+    <path d="M114 64 C185 73, 250 36, 241 -92" stroke="#FFCB9A" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+    <path d="M241 -92 L236 -78" stroke="#FFCB9A" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+    <path d="M241 -92 L248 -78" stroke="#FFCB9A" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+  </svg>
 </div>
-
-<style>
-.hh{position:absolute;width:10px;height:10px;border-radius:50%;border:2px solid #fff;cursor:move;transform:translate(-50%,-50%);z-index:10;}
-</style>
-
-<script>
-(function(){
-  var pts=[{x:8,y:82},{x:30,y:50},{x:100,y:30},{x:188,y:10}];
-  var edPos={top:160,right:200};
-  var ed=document.getElementById('hint-editor');
-  var handles=[0,1,2,3].map(function(i){return document.getElementById('hh'+i);});
-  var curve=document.getElementById('hint-curve');
-  var h1=document.getElementById('hint-h1'),h2=document.getElementById('hint-h2');
-  var cl1=document.getElementById('cl1'),cl2=document.getElementById('cl2');
-  var infoPos=document.getElementById('info-pos'),infoPath=document.getElementById('info-path');
-
-  function arrowhead(p2,p3){
-    var dx=p3.x-p2.x,dy=p3.y-p2.y,l=Math.sqrt(dx*dx+dy*dy)||1;
-    var ux=dx/l,uy=dy/l,px=-uy,py=ux,s=13;
-    return{
-      l1:'M'+p3.x+' '+p3.y+' L'+(p3.x-s*ux+s*0.45*px)+' '+(p3.y-s*uy+s*0.45*py),
-      l2:'M'+p3.x+' '+p3.y+' L'+(p3.x-s*ux-s*0.45*px)+' '+(p3.y-s*uy-s*0.45*py)
-    };
-  }
-
-  function render(){
-    var p=pts;
-    var d='M'+p[0].x+' '+p[0].y+' C'+p[1].x+' '+p[1].y+', '+p[2].x+' '+p[2].y+', '+p[3].x+' '+p[3].y;
-    curve.setAttribute('d',d);
-    var ah=arrowhead(p[2],p[3]);
-    h1.setAttribute('d',ah.l1); h2.setAttribute('d',ah.l2);
-    cl1.setAttribute('x1',p[0].x);cl1.setAttribute('y1',p[0].y);cl1.setAttribute('x2',p[1].x);cl1.setAttribute('y2',p[1].y);
-    cl2.setAttribute('x1',p[2].x);cl2.setAttribute('y1',p[2].y);cl2.setAttribute('x2',p[3].x);cl2.setAttribute('y2',p[3].y);
-    handles.forEach(function(h,i){h.style.left=p[i].x+'px';h.style.top=p[i].y+'px';});
-    infoPos.textContent='top:'+Math.round(edPos.top)+' right:'+Math.round(edPos.right);
-    infoPath.textContent=d;
-  }
-  render();
-
-  // Drag handles
-  var draggingHandle=null,svgRect;
-  handles.forEach(function(h,i){
-    h.addEventListener('mousedown',function(e){
-      draggingHandle=i;
-      svgRect=document.getElementById('hint-svg').getBoundingClientRect();
-      e.stopPropagation();e.preventDefault();
-    });
-  });
-
-  // Drag whole editor
-  var draggingEd=false,ox,oy,st,sr;
-  document.getElementById('hint-label').addEventListener('mousedown',function(e){
-    draggingEd=true;ox=e.clientX;oy=e.clientY;st=edPos.top;sr=edPos.right;
-    e.preventDefault();
-  });
-
-  document.addEventListener('mousemove',function(e){
-    if(draggingHandle!==null){
-      var svx=(e.clientX-svgRect.left)/svgRect.width*200;
-      var svy=(e.clientY-svgRect.top)/svgRect.height*90;
-      pts[draggingHandle]={x:Math.round(svx),y:Math.round(svy)};
-      render();
-    } else if(draggingEd){
-      edPos.top=st+(e.clientY-oy);
-      edPos.right=sr-(e.clientX-ox);
-      ed.style.top=edPos.top+'px';ed.style.right=edPos.right+'px';
-      render();
-    }
-  });
-  document.addEventListener('mouseup',function(){draggingHandle=null;draggingEd=false;});
-})();
-</script>
 </body>
 </html>
