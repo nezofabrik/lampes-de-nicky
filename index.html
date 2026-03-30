@@ -18,7 +18,10 @@
   <!-- Preconnect -->
   <link rel="dns-prefetch" href="https://www.gstatic.com">
   <link rel="dns-prefetch" href="https://firestore.googleapis.com">
-  <link rel="stylesheet" href="css/style.css?v=6">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&display=swap">
+  <link rel="stylesheet" href="css/style.css?v=7">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.json">
   <script>(function(){var t=localStorage.getItem("nicky_theme");if(t==="dark")document.documentElement.setAttribute("data-theme","dark");}());</script>
@@ -123,6 +126,17 @@
   </div>
 
   <div class="hero-visual">
+    <!-- Hint vers le bouton mode nuit -->
+    <div class="lamp-hint" id="lamp-hint">
+      <svg class="lamp-hint-arrow" viewBox="0 0 70 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Courbe montant vers le haut-droite (vers le toggle dans la nav) -->
+        <path d="M 18 100 C 8 72, 28 40, 54 12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+        <!-- Pointe de flèche -->
+        <path d="M54 12 L40 22" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+        <path d="M54 12 L60 26" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+      </svg>
+      <p class="lamp-hint-text">"passe en<br>mode nuit !"</p>
+    </div>
     <!-- Lampe suspendue — s'allume en mode sombre -->
     <svg class="hero-lamp-svg" viewBox="0 0 300 420" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>

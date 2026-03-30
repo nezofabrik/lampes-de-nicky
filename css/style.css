@@ -2185,6 +2185,45 @@ body { transition: color 0.35s ease; }
 [data-theme="dark"] .footer-bottom a    { color: var(--peach); opacity: 0.9; }
 
 /* ===========================
+   HINT MODE NUIT — LAMPE
+=========================== */
+.lamp-hint {
+  position: absolute;
+  top: 28px;
+  right: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: var(--teal);
+  opacity: 0.72;
+  pointer-events: none;
+  animation: hint-float 3.5s ease-in-out infinite;
+}
+[data-theme="dark"] .lamp-hint { display: none; }
+
+.lamp-hint-arrow {
+  width: 52px;
+  height: 82px;
+}
+
+.lamp-hint-text {
+  font-family: 'Caveat', cursive;
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: center;
+  transform: rotate(-6deg);
+  margin: 0;
+  color: var(--teal);
+}
+
+@keyframes hint-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-6px); }
+}
+
+/* ===========================
    LAMPE SUSPENDUE — HERO
    (allumage en mode sombre)
 =========================== */
