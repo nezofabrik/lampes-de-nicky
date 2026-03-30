@@ -127,13 +127,13 @@
 
   <div class="hero-visual">
     <!-- Hint vers le bouton mode nuit -->
-    <div class="lamp-hint" id="lamp-hint">
-      <svg class="lamp-hint-arrow" viewBox="0 0 70 110" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Courbe montant vers le haut-droite (vers le toggle dans la nav) -->
-        <path d="M 18 100 C 8 72, 28 40, 54 12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/>
-        <!-- Pointe de flèche -->
-        <path d="M54 12 L40 22" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/>
-        <path d="M54 12 L60 26" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+    <div class="lamp-hint" id="lamp-hint" aria-hidden="true">
+      <svg class="lamp-hint-arrow" viewBox="0 0 80 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Courbe du bas-droite vers le haut-gauche (toggle est 126px à gauche, 251px au-dessus) -->
+        <path d="M 65 100 C 75 70, 40 25, 15 10" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+        <!-- Pointe de flèche en haut-gauche -->
+        <path d="M15 10 L30 12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+        <path d="M15 10 L24 22" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/>
       </svg>
       <p class="lamp-hint-text">"passe en<br>mode nuit !"</p>
     </div>
