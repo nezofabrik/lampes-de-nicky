@@ -2189,8 +2189,8 @@ body { transition: color 0.35s ease; }
 =========================== */
 .lamp-hint {
   position: fixed;
-  top: 153px;
-  right: 207px;
+  top: 174px;
+  right: -89px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;

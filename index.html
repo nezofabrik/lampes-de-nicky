@@ -431,60 +431,14 @@
 <script src="js/firebase-config.js?v=5"></script>
 <script src="js/main.js?v=3"></script>
 
-<!-- ═══ ÉDITEUR HINT — TEMPORAIRE ═══ -->
-<div id="hint-editor" style="position:fixed;top:153px;right:207px;z-index:99999;user-select:none;">
-  <p id="hint-label" style="font-family:'Caveat',cursive;font-size:1.2rem;font-weight:700;color:#FFCB9A;margin:0 0 4px 0;text-shadow:0 2px 8px rgba(0,0,0,0.8);transform:rotate(-3deg);cursor:grab;">"essaie le mode nuit !"</p>
-  <div style="position:relative;width:200px;height:90px;">
-    <svg id="hint-svg" viewBox="0 0 200 90" width="200" height="90" fill="none" style="overflow:visible;display:block;">
-      <line id="cl1" stroke="#ffd93d" stroke-width="1" stroke-dasharray="3,3" opacity="0.6"/>
-      <line id="cl2" stroke="#6bcb77" stroke-width="1" stroke-dasharray="3,3" opacity="0.6"/>
-      <path id="hint-curve" stroke="#FFCB9A" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-      <path id="hint-h1" stroke="#FFCB9A" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-      <path id="hint-h2" stroke="#FFCB9A" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-    </svg>
-    <div class="hh" id="hh0" style="background:#ff6b6b;" title="Départ"></div>
-    <div class="hh" id="hh1" style="background:#ffd93d;" title="Ctrl 1"></div>
-    <div class="hh" id="hh2" style="background:#6bcb77;" title="Ctrl 2"></div>
-    <div class="hh" id="hh3" style="background:#4d96ff;" title="Pointe"></div>
-  </div>
-  <div style="background:rgba(0,0,0,0.88);color:#fff;padding:8px 12px;border-radius:8px;margin-top:6px;font-family:monospace;font-size:11px;line-height:1.9;">
-    <div>🔴départ &nbsp;🟡ctrl1 &nbsp;🟢ctrl2 &nbsp;🔵pointe — glisse le texte pour déplacer</div>
-    <div id="info-pos" style="color:#FFCB9A;"></div>
-    <div id="info-path" style="color:#aaa;font-size:10px;"></div>
-    <button onclick="(function(){navigator.clipboard.writeText(document.getElementById('info-pos').textContent+' | '+document.getElementById('info-path').textContent);alert('Copié !');})();" style="margin-top:4px;background:#FFCB9A;border:none;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:11px;font-weight:700;">📋 Copier</button>
-  </div>
+<!-- Hint mode nuit — position calibrée -->
+<div class="lamp-hint" id="lamp-hint" aria-hidden="true">
+  <p class="lamp-hint-text">"essaie le mode nuit !"</p>
+  <svg class="lamp-hint-arrow" viewBox="0 0 200 90" fill="none" style="overflow:visible;">
+    <path d="M15 73 C118 69,224 16,179 -117" stroke="#FFCB9A" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+    <path d="M179 -117 L190 -106" stroke="#FFCB9A" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+    <path d="M179 -117 L178 -102" stroke="#FFCB9A" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+  </svg>
 </div>
-<style>.hh{position:absolute;width:10px;height:10px;border-radius:50%;border:2px solid #fff;cursor:move;transform:translate(-50%,-50%);z-index:10;}</style>
-<script>
-(function(){
-  var pts=[{x:114,y:64},{x:185,y:73},{x:250,y:36},{x:241,y:-92}];
-  var edPos={top:153,right:207};
-  var ed=document.getElementById('hint-editor');
-  var hs=[0,1,2,3].map(function(i){return document.getElementById('hh'+i);});
-  var curve=document.getElementById('hint-curve'),h1=document.getElementById('hint-h1'),h2=document.getElementById('hint-h2');
-  var cl1=document.getElementById('cl1'),cl2=document.getElementById('cl2');
-  var iPos=document.getElementById('info-pos'),iPath=document.getElementById('info-path');
-  function ah(p2,p3){var dx=p3.x-p2.x,dy=p3.y-p2.y,l=Math.sqrt(dx*dx+dy*dy)||1,ux=dx/l,uy=dy/l,px=-uy,py=ux,s=13;return{l1:'M'+p3.x+' '+p3.y+' L'+(p3.x-s*ux+s*.45*px)+' '+(p3.y-s*uy+s*.45*py),l2:'M'+p3.x+' '+p3.y+' L'+(p3.x-s*ux-s*.45*px)+' '+(p3.y-s*uy-s*.45*py)};}
-  function render(){
-    var p=pts,d='M'+p[0].x+' '+p[0].y+' C'+p[1].x+' '+p[1].y+','+p[2].x+' '+p[2].y+','+p[3].x+' '+p[3].y;
-    curve.setAttribute('d',d);var a=ah(p[2],p[3]);h1.setAttribute('d',a.l1);h2.setAttribute('d',a.l2);
-    cl1.setAttribute('x1',p[0].x);cl1.setAttribute('y1',p[0].y);cl1.setAttribute('x2',p[1].x);cl1.setAttribute('y2',p[1].y);
-    cl2.setAttribute('x1',p[2].x);cl2.setAttribute('y1',p[2].y);cl2.setAttribute('x2',p[3].x);cl2.setAttribute('y2',p[3].y);
-    hs.forEach(function(h,i){h.style.left=p[i].x+'px';h.style.top=p[i].y+'px';});
-    iPos.textContent='top:'+Math.round(edPos.top)+' right:'+Math.round(edPos.right);
-    iPath.textContent=d;
-  }
-  render();
-  var dh=null,sr2;
-  hs.forEach(function(h,i){h.addEventListener('mousedown',function(e){dh=i;sr2=document.getElementById('hint-svg').getBoundingClientRect();e.stopPropagation();e.preventDefault();});});
-  var de=false,ox,oy,st,sr;
-  document.getElementById('hint-label').addEventListener('mousedown',function(e){de=true;ox=e.clientX;oy=e.clientY;st=edPos.top;sr=edPos.right;e.preventDefault();});
-  document.addEventListener('mousemove',function(e){
-    if(dh!==null){pts[dh]={x:Math.round((e.clientX-sr2.left)/sr2.width*200),y:Math.round((e.clientY-sr2.top)/sr2.height*90)};render();}
-    else if(de){edPos.top=st+(e.clientY-oy);edPos.right=sr-(e.clientX-ox);ed.style.top=edPos.top+'px';ed.style.right=edPos.right+'px';render();}
-  });
-  document.addEventListener('mouseup',function(){dh=null;de=false;});
-})();
-</script>
 </body>
 </html>
