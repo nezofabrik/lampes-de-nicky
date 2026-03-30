@@ -96,7 +96,7 @@ function renderCard(lamp) {
       <div class="product-desc">${escapeHtml(lamp.desc)}</div>
       ${lamp.comment ? `<div class="product-comment">"${escapeHtml(lamp.comment)}"</div>` : ''}
       <div class="product-footer">
-        <span class="product-price" data-target="${lamp.price}">0 CHF</span>
+        <span class="product-price" data-target="${lamp.price}">${lamp.price > 0 ? lamp.price + ' CHF' : 'Sur demande'}</span>
         <button class="add-to-cart">Ajouter</button>
       </div>
     </div>
@@ -530,6 +530,40 @@ function sendOrderEmail(order) {
   }).catch(function() {}); // silencieux — ne bloque pas la commande
 }
 
+function sendConfirmationEmail(order) {
+  if (!WEB3FORMS_KEY || WEB3FORMS_KEY === 'VOTRE_CLE_WEB3FORMS') return;
+  const items = order.items.map(i => `• ${i.name} × ${i.qty} — ${i.price * i.qty} CHF`).join('\n');
+  const body = [
+    `Bonjour ${order.prenom},`,
+    ``,
+    `Merci pour votre commande ! Nicky a bien reçu votre demande et vous contactera sous 24h pour confirmer les détails et convenir du paiement.`,
+    ``,
+    `Récapitulatif :`,
+    items,
+    ``,
+    `Total : ${order.total} CHF`,
+    `Livraison : ${order.shipping === 0 ? 'Offerte' : order.shipping + ' CHF'}`,
+    ``,
+    order.message ? `Votre message : ${order.message}` : '',
+    ``,
+    `À très bientôt,`,
+    `Nicky — Les Lampes de Nicky`
+  ].filter(l => l !== undefined).join('\n');
+
+  fetch('https://api.web3forms.com/submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      access_key: WEB3FORMS_KEY,
+      to: order.email,
+      subject: `✨ Votre commande chez Les Lampes de Nicky`,
+      message: body,
+      from_name: 'Les Lampes de Nicky',
+      replyto: 'info@14level-up.ch'
+    })
+  }).catch(function() {});
+}
+
 // ── CHECKOUT FORM ─────────────────────────────────────
 
 function initCheckoutForm() {
@@ -563,6 +597,7 @@ function initCheckoutForm() {
     function onSaved(ok) {
       if (ok) {
         sendOrderEmail(order);
+        sendConfirmationEmail(order);
         saveCart([]);
         updateCartCount();
         document.getElementById('checkout-success').style.display = 'block';
