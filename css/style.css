@@ -2189,33 +2189,35 @@ body { transition: color 0.35s ease; }
 =========================== */
 .lamp-hint {
   position: absolute;
-  top: 0;
-  right: -10px;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
   gap: 6px;
   pointer-events: none;
-  z-index: 100;
+  z-index: 9999;
+  white-space: nowrap;
   animation: hint-float 3s ease-in-out infinite;
 }
 [data-theme="dark"] .lamp-hint { display: none; }
 @media (max-width: 1024px) { .lamp-hint { display: none; } }
 
 .lamp-hint-arrow {
-  width: 88px;
-  height: 115px;
+  width: 50px;
+  height: 60px;
 }
 
 .lamp-hint-text {
   font-family: 'Caveat', cursive;
-  font-size: 1.2rem;
-  font-weight: 600;
-  line-height: 1.3;
-  text-align: right;
-  transform: rotate(-4deg);
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-align: center;
+  transform: rotate(-3deg);
   margin: 0;
   color: #FFCB9A;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.9);
 }
 
 @keyframes hint-float {
