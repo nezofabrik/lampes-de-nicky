@@ -307,10 +307,17 @@ nav a.active::after { width: 100%; }
   z-index: 1;
 }
 
+.hero-lamp-wrapper {
+  /* Le filter est sur le wrapper, pas sur l'élément animé */
+  filter: drop-shadow(0 20px 60px rgba(255,203,154,0.25));
+  will-change: transform;
+  animation: float 5s ease-in-out infinite;
+  transform: translateZ(0); /* force GPU layer sur Windows */
+}
+
 .hero-lamp-svg {
   width: min(360px, 90%);
-  filter: drop-shadow(0 20px 60px rgba(255,203,154,0.25));
-  animation: float 5s ease-in-out infinite;
+  display: block;
 }
 
 @keyframes float {
@@ -2220,7 +2227,7 @@ body { transition: color 0.35s ease; }
 [data-theme="dark"] .hero-lamp-svg .lamp-ray {
   animation: ray-on 1.8s ease-out 1.2s forwards;
 }
-[data-theme="dark"] .hero-lamp-svg {
+[data-theme="dark"] .hero-lamp-wrapper {
   animation: float 5s ease-in-out infinite,
              lamp-outer-glow 4s ease-in-out 1.5s infinite;
 }
@@ -2429,18 +2436,20 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   outline-offset: 2px;
 }
 
-/* Reduced motion preference */
+/* Reduced motion — on garde la lampe, on coupe les effets non-essentiels */
 @media (prefers-reduced-motion: reduce) {
+  /* Transitions UI courtes mais présentes */
   *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: 0.1ms !important;
     scroll-behavior: auto !important;
   }
-  .reveal { opacity: 1; transform: none; }
+  /* On coupe les animations décoratives */
   .nicky-firefly { display: none; }
-  .hero-lamp-svg * { animation: none !important; }
   #particles-canvas, #cursor-glow { display: none !important; }
+  .reveal { opacity: 1; transform: none; }
+  /* La lampe reste animée (c'est la feature principale) */
+  /* mais on coupe les effets non-critiques */
+  .lamp-ray, .nicky-firefly { animation: none !important; }
 }
 
 /* Smooth scroll */
