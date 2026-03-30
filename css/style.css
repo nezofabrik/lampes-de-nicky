@@ -2195,8 +2195,8 @@ body { transition: color 0.35s ease; }
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  color: var(--teal);
-  opacity: 0.72;
+  color: #FFCB9A;
+  opacity: 0.88;
   pointer-events: none;
   animation: hint-float 3.5s ease-in-out infinite;
 }
@@ -2209,13 +2209,13 @@ body { transition: color 0.35s ease; }
 
 .lamp-hint-text {
   font-family: 'Caveat', cursive;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   font-weight: 500;
   line-height: 1.35;
   text-align: center;
   transform: rotate(-6deg);
   margin: 0;
-  color: var(--teal);
+  color: #FFCB9A;
 }
 
 @keyframes hint-float {
