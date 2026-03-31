@@ -2443,13 +2443,12 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
     transition-duration: 0.1ms !important;
     scroll-behavior: auto !important;
   }
-  /* On coupe les animations décoratives */
-  .nicky-firefly { display: none; }
+  /* On coupe les animations décoratives lourdes */
   #particles-canvas, #cursor-glow { display: none !important; }
   .reveal { opacity: 1; transform: none; }
-  /* La lampe reste animée (c'est la feature principale) */
-  /* mais on coupe les effets non-critiques */
-  .lamp-ray, .nicky-firefly { animation: none !important; }
+  /* La lampe et les lucioles restent visibles (identité visuelle) */
+  /* mais on stoppe leurs animations pour la perf */
+  .lamp-ray { animation: none !important; }
 }
 
 /* Smooth scroll */
