@@ -82,7 +82,7 @@ function renderCard(lamp) {
   const firstImg = (lamp.images && lamp.images.length) ? lamp.images[0] : lamp.image;
   const cat = lamp.category || 'suspension';
   const ph = firstImg
-    ? `<img src="${firstImg}" alt="${escapeHtml(lamp.name)}" class="product-photo" data-cat="${cat}" style="width:100%;height:100%;object-fit:cover">`
+    ? `<img src="${firstImg}" alt="${escapeHtml(lamp.name)}" class="product-photo" data-cat="${cat}" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in"><div class="zoom-hint">🔍</div>`
     : `<div class="img-placeholder ph-${cat}">${LAMP_SVG[cat] || ''}</div>`;
   return `
   <div class="product-card reveal" data-id="${lamp.id}" data-name="${lamp.name.replace(/"/g, '&quot;')}" data-price="${lamp.price}" data-category="${lamp.category}">
@@ -113,10 +113,11 @@ function renderGrid(containerId, filter) {
   getLampsAsync(function(lamps) {
     const list = (!filter || filter === 'all') ? lamps : lamps.filter(l => l.category === filter);
     el.innerHTML = list.map(renderCard).join('');
-    el.querySelectorAll('.product-card').forEach((c, i) => { c.style.transitionDelay = `${i * 0.07}s`; });
+    el.querySelectorAll('.product-card').forEach((c, i) => { c.style.transitionDelay = `${i * 0.1}s`; });
     initAddToCartButtons();
     initScrollReveal();
     initPriceCounters();
+    initPhotoZoom();
   });
 }
 
@@ -600,7 +601,10 @@ function initCheckoutForm() {
         sendConfirmationEmail(order);
         saveCart([]);
         updateCartCount();
-        document.getElementById('checkout-success').style.display = 'block';
+        var successEl = document.getElementById('checkout-success');
+        successEl.style.display = 'block';
+        setTimeout(function() { successEl.classList.add('visible'); }, 10);
+        launchConfetti();
         document.getElementById('checkout-form-wrapper').style.display = 'none';
         document.getElementById('cart-block').style.display = 'none';
       } else {
@@ -617,6 +621,62 @@ function initCheckoutForm() {
       setTimeout(() => onSaved(true), 800);
     }
   });
+}
+
+// ── PHOTO LIGHTBOX ──────────────────────────────────────
+
+function initPhotoZoom() {
+  if (!document.getElementById('photo-lightbox')) {
+    var lb = document.createElement('div');
+    lb.id = 'photo-lightbox';
+    lb.innerHTML = '<div class="lb-backdrop"></div><div class="lb-content"><img class="lb-img" src="" alt=""><button class="lb-close" aria-label="Fermer">&times;</button></div>';
+    document.body.appendChild(lb);
+    lb.querySelector('.lb-backdrop').addEventListener('click', closeLightbox);
+    lb.querySelector('.lb-close').addEventListener('click', closeLightbox);
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLightbox(); });
+  }
+  document.querySelectorAll('.product-photo').forEach(function(img) {
+    if (img.dataset.zoomInit) return;
+    img.dataset.zoomInit = '1';
+    img.addEventListener('click', function() { openLightbox(img.src, img.alt); });
+  });
+}
+
+function openLightbox(src, alt) {
+  var lb = document.getElementById('photo-lightbox');
+  lb.querySelector('.lb-img').src = src;
+  lb.querySelector('.lb-img').alt = alt || '';
+  lb.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  var lb = document.getElementById('photo-lightbox');
+  if (lb) { lb.classList.remove('open'); document.body.style.overflow = ''; }
+}
+
+// ── CONFETTI ──────────────────────────────────────
+
+function launchConfetti() {
+  var colors = ['#116466','#FFCB9A','#2d8a5a','#FFB040','#E8D5B7','#9ecfcf','#d4af7a'];
+  for (var i = 0; i < 90; i++) {
+    (function() {
+      var el = document.createElement('div');
+      el.className = 'confetti-piece';
+      var size = 6 + Math.random() * 9;
+      el.style.cssText = [
+        'left:' + (Math.random() * 100) + 'vw',
+        'background:' + colors[Math.floor(Math.random() * colors.length)],
+        'animation-delay:' + (Math.random() * 1.5) + 's',
+        'animation-duration:' + (2 + Math.random() * 2) + 's',
+        'width:' + size + 'px',
+        'height:' + size + 'px',
+        'border-radius:' + (Math.random() > 0.5 ? '50%' : '3px')
+      ].join(';');
+      document.body.appendChild(el);
+      el.addEventListener('animationend', function() { el.remove(); });
+    })();
+  }
 }
 
 // ── CONTACT FORM ──────────────────────────────────────
