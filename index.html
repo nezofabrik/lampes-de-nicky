@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Les Lampes de Nicky — Lumières artisanales faites main</title>
   <meta name="description" content="Lampes artisanales faites main par Nicky. Suspensions, lampes de table et appliques murales uniques, créées avec des matériaux naturels.">
-  <meta name="theme-color" content="#116466">
+  <meta name="theme-color" content="#8B5E3C">
   <meta name="author" content="Les Lampes de Nicky">
   <link rel="canonical" href="https://lampes-de-nicky.ch/">
   <!-- Open Graph -->
@@ -20,8 +20,7 @@
   <link rel="dns-prefetch" href="https://firestore.googleapis.com">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&display=swap">
-  <link rel="stylesheet" href="css/style.css?v=9">
+  <link rel="stylesheet" href="css/style.css?v=10">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.json">
   <script>(function(){var t=localStorage.getItem("nicky_theme");if(t==="dark")document.documentElement.setAttribute("data-theme","dark");}());</script>
@@ -51,7 +50,7 @@
 </head>
 <body>
 <a href="#main-content" class="skip-link">Aller au contenu principal</a>
-<noscript><div style="background:#116466;color:white;text-align:center;padding:1rem;">Ce site nécessite JavaScript pour fonctionner correctement.</div></noscript>
+<noscript><div style="background:#8B5E3C;color:white;text-align:center;padding:1rem;">Ce site nécessite JavaScript pour fonctionner correctement.</div></noscript>
 
 <!-- ════════════════════════════
      HEADER
@@ -80,6 +79,9 @@
   </a>
 
   <nav role="navigation" aria-label="Navigation principale">
+    <button class="burger-btn" id="burger-btn" aria-label="Ouvrir le menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
     <a href="index.html" class="active">Accueil</a>
     <a href="articles.html">Boutique</a>
     <a href="contact.html">Contact</a>
@@ -155,13 +157,13 @@
       <rect x="139" y="78" width="22" height="12" rx="4" fill="#C8A87A" opacity="0.85"/>
 
       <!-- Abat-jour (suspension évasée vers le bas) -->
-      <path d="M112 86 L42 218 L258 218 L188 86 Z" fill="#116466" opacity="0.95"/>
+      <path d="M112 86 L42 218 L258 218 L188 86 Z" fill="#5C3D1E" opacity="0.95"/>
       <!-- Reflet interne -->
       <path d="M124 86 L68 208 L232 208 L176 86 Z" fill="white" opacity="0.042"/>
       <!-- Rim bas -->
-      <ellipse cx="150" cy="218" rx="108" ry="16" fill="#0a3d3f"/>
+      <ellipse cx="150" cy="218" rx="108" ry="16" fill="#3D2410"/>
       <!-- Rim haut -->
-      <ellipse cx="150" cy="86"  rx="38"  ry="10" fill="#0a3d3f"/>
+      <ellipse cx="150" cy="86"  rx="38"  ry="10" fill="#3D2410"/>
 
       <!-- Ampoule (glow) — s'allume en mode sombre -->
       <ellipse cx="150" cy="152" rx="28" ry="36" fill="url(#bulbGrad)" class="lamp-bulb"/>
@@ -268,6 +270,36 @@
 </section>
 
 <!-- ════════════════════════════
+     JE SUIS NICKY
+════════════════════════════ -->
+<section style="background: var(--mint); padding: 5rem 2.5rem;">
+  <div class="container">
+    <div class="nicky-section-layout">
+      <div class="nicky-section-text reveal">
+        <span class="eyebrow">À propos</span>
+        <h2>Bonjour, Je suis Nicky</h2>
+        <div class="divider"></div>
+        <p style="font-size:1.05rem; line-height:1.8; margin-bottom:1rem;">
+          Artisane passionnée, je crée des lampes uniques depuis mon atelier. Chaque pièce est réalisée à la main avec des matériaux soigneusement sélectionnés.
+        </p>
+        <p style="line-height:1.8; margin-bottom:2rem; color: var(--muted);">
+          Que vous ayez une question sur une lampe, une idée de commande sur mesure, ou simplement envie de discuter lumière — je suis là !
+        </p>
+        <a href="contact.html" class="btn btn-dark">Me contacter</a>
+      </div>
+      <div class="nicky-section-deco reveal" aria-hidden="true">
+        <svg width="120" viewBox="0 0 44 44" fill="none" opacity="0.25">
+          <ellipse cx="22" cy="24" rx="14" ry="5" fill="var(--dark)"/>
+          <path d="M10 26 L16 10 L28 10 L34 26 Z" fill="var(--dark)"/>
+          <rect x="20.5" y="26" width="3" height="10" fill="var(--dark)" rx="1"/>
+          <ellipse cx="22" cy="37" rx="7" ry="2.2" fill="var(--dark)"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════
      CITATION
 ════════════════════════════ -->
 <section style="background: var(--beige); padding: 4rem 2.5rem; text-align:center;">
@@ -278,7 +310,7 @@
     <p style="font-family:'Playfair Display',serif; font-size:clamp(1.1rem,2.5vw,1.6rem); color:var(--dark); font-style:italic; line-height:1.6; margin-bottom:1.5rem;">
       "La lumière n'est pas seulement fonctionnelle — elle crée une atmosphère, raconte une histoire, transforme un espace en foyer."
     </p>
-    <span style="font-family:'Dancing Script',cursive; font-size:1.2rem; color:var(--teal);">— Nicky</span>
+    <span style="font-family:'Dancing Script',cursive; font-size:1.2rem; color:var(--beige);">— Nicky</span>
   </div>
 </section>
 
@@ -311,9 +343,9 @@
         <h4>Boutique</h4>
         <ul>
           <li><a href="articles.html">Toutes les lampes</a></li>
-          <li><a href="articles.html?cat=suspension">Suspensions</a></li>
-          <li><a href="articles.html?cat=table">Lampes de table</a></li>
-          <li><a href="articles.html?cat=applique">Appliques murales</a></li>
+          <li><a href="articles.html?cat=tissu-metallique">Tissu métallique</a></li>
+          <li><a href="articles.html?cat=fibre-naturelle">Fibre naturelle</a></li>
+          <li><a href="articles.html?cat=lin">En lin</a></li>
         </ul>
       </div>
 
@@ -340,7 +372,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="js/firebase-config.js?v=5"></script>
-<script src="js/main.js?v=5"></script>
+<script src="js/main.js?v=6"></script>
 
 </body>
 </html>

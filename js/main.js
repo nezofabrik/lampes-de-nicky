@@ -5,21 +5,32 @@
 // ── LAMP DATA ─────────────────────────────────────────
 
 const DEFAULT_LAMPS = [
-  { id:'p1', name:'Lin Gris Anthracite', category:'suspension', price:164, badge:'Pièce rare', badgeNew:false,
+  { id:'p1', name:'Lin Gris Anthracite', category:'lin', price:164, badge:'Pièce rare', badgeNew:false,
     desc:"Suspension en lin gris anthracite avec ficelle de chanvre. Bois réutilisé, fibre naturelle. Taille M : 65×22 cm. Ampoule non fournie.",
     images:['images/lin-gris-1.jpg','images/lin-gris-2.jpg','images/lin-gris-3.jpg','images/lin-gris-4.jpg','images/lin-gris-5.jpg'], image:null },
-  { id:'p2', name:'Lin Beige & Blanc', category:'suspension', price:164, badge:'Pièce rare', badgeNew:false,
+  { id:'p2', name:'Lin Beige & Blanc', category:'lin', price:164, badge:'Pièce rare', badgeNew:false,
     desc:"Suspension en lin extérieur beige et intérieur blanc, ficelle de chanvre. Bois réutilisé, fibre naturelle. Taille M : 62×26 cm. Ampoule non fournie.",
     images:['images/lin-beige-1.jpg','images/lin-beige-2.jpg','images/lin-beige-3.jpg','images/lin-beige-4.jpg','images/lin-beige-5.jpg'], image:null },
 ];
 
+const _SUSP_SVG = `<svg fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 60 80"><line x1="30" y1="0" x2="30" y2="14" stroke-dasharray="3 3"/><path d="M8 48 L18 16 L42 16 L52 48 Z"/><ellipse cx="30" cy="49" rx="22" ry="6" opacity=".5"/><ellipse cx="30" cy="52" rx="14" ry="4" fill="currentColor" opacity=".3"/></svg>`;
 const LAMP_SVG = {
-  suspension:`<svg fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 60 80"><line x1="30" y1="0" x2="30" y2="14" stroke-dasharray="3 3"/><path d="M8 48 L18 16 L42 16 L52 48 Z"/><ellipse cx="30" cy="49" rx="22" ry="6" opacity=".5"/><ellipse cx="30" cy="52" rx="14" ry="4" fill="currentColor" opacity=".3"/></svg>`,
+  'tissu-metallique': _SUSP_SVG,
+  'fibre-naturelle':  _SUSP_SVG,
+  'lampe-a-motif':    `<svg fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 60 80"><path d="M15 42 L22 20 L38 20 L45 42 Z"/><rect x="28" y="42" width="4" height="22" rx="1"/><ellipse cx="30" cy="65" rx="14" ry="4"/><ellipse cx="30" cy="44" rx="15" ry="4" opacity=".4"/></svg>`,
+  'lin':              _SUSP_SVG,
+  suspension: _SUSP_SVG,
   table:`<svg fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 60 80"><path d="M15 42 L22 20 L38 20 L45 42 Z"/><rect x="28" y="42" width="4" height="22" rx="1"/><ellipse cx="30" cy="65" rx="14" ry="4"/><ellipse cx="30" cy="44" rx="15" ry="4" opacity=".4"/></svg>`,
   applique:`<svg fill="none" stroke="currentColor" stroke-width="1.2" viewBox="0 0 60 80"><rect x="4" y="32" width="10" height="18" rx="1"/><rect x="13" y="37" width="18" height="3" rx="1"/><path d="M28 24 L38 42 L50 46 L42 20 Z"/><ellipse cx="40" cy="28" rx="6" ry="10" opacity=".3" transform="rotate(20 40 28)"/></svg>`,
 };
 
-function catLabel(c) { return {suspension:'Suspension',table:'Lampe de table',applique:'Applique murale'}[c] || c; }
+function catLabel(c) {
+  return {
+    'tissu-metallique':'Tissu métallique','fibre-naturelle':'Fibre naturelle',
+    'lampe-a-motif':'Lampe à motif','lin':'En lin',
+    suspension:'Suspension',table:'Lampe de table',applique:'Applique murale'
+  }[c] || c;
+}
 
 // ── IndexedDB helpers ─────────────────────────────────
 const _DB_NAME = 'nickyDB', _DB_VER = 1, _STORE = 'lamps';
@@ -85,7 +96,7 @@ function renderCard(lamp) {
     ? `<img src="${firstImg}" alt="${escapeHtml(lamp.name)}" class="product-photo" data-cat="${cat}" style="width:100%;height:100%;object-fit:cover;cursor:zoom-in"><div class="zoom-hint">🔍</div>`
     : `<div class="img-placeholder ph-${cat}">${LAMP_SVG[cat] || ''}</div>`;
   return `
-  <div class="product-card reveal" data-id="${lamp.id}" data-name="${lamp.name.replace(/"/g, '&quot;')}" data-price="${lamp.price}" data-category="${lamp.category}">
+  <div class="product-card reveal" data-id="${lamp.id}" data-name="${lamp.name.replace(/"/g, '&quot;')}" data-price="${lamp.price}" data-category="${lamp.category}" data-images="${(lamp.images && lamp.images.length ? lamp.images : lamp.image ? [lamp.image] : []).map(i => encodeURIComponent(i)).join(',')}">
     <div class="product-image">
       ${ph}
       ${lamp.badge ? `<span class="product-badge${lamp.badgeNew ? ' new' : ''}">${lamp.badge}</span>` : ''}
@@ -625,29 +636,88 @@ function initCheckoutForm() {
 
 // ── PHOTO LIGHTBOX ──────────────────────────────────────
 
+var _lbImages = [], _lbIdx = 0, _lbTouchX = 0;
+
 function initPhotoZoom() {
   if (!document.getElementById('photo-lightbox')) {
     var lb = document.createElement('div');
     lb.id = 'photo-lightbox';
-    lb.innerHTML = '<div class="lb-backdrop"></div><div class="lb-content"><img class="lb-img" src="" alt=""><button class="lb-close" aria-label="Fermer">&times;</button></div>';
+    lb.innerHTML = [
+      '<div class="lb-backdrop"></div>',
+      '<div class="lb-content">',
+        '<img class="lb-img" src="" alt="">',
+        '<button class="lb-close" aria-label="Fermer">&times;</button>',
+        '<button class="lb-prev" aria-label="Précédent">&#8592;</button>',
+        '<button class="lb-next" aria-label="Suivant">&#8594;</button>',
+        '<div class="lb-counter"></div>',
+      '</div>'
+    ].join('');
     document.body.appendChild(lb);
     lb.querySelector('.lb-backdrop').addEventListener('click', closeLightbox);
     lb.querySelector('.lb-close').addEventListener('click', closeLightbox);
-    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeLightbox(); });
+    lb.querySelector('.lb-prev').addEventListener('click', function() { _lbNav(-1); });
+    lb.querySelector('.lb-next').addEventListener('click', function() { _lbNav(1); });
+    document.addEventListener('keydown', function(e) {
+      if (!document.getElementById('photo-lightbox').classList.contains('open')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') _lbNav(-1);
+      if (e.key === 'ArrowRight') _lbNav(1);
+    });
+    lb.addEventListener('touchstart', function(e) { _lbTouchX = e.touches[0].clientX; }, { passive: true });
+    lb.addEventListener('touchend', function(e) {
+      var dx = e.changedTouches[0].clientX - _lbTouchX;
+      if (dx < -40) _lbNav(1);
+      else if (dx > 40) _lbNav(-1);
+    });
   }
   document.querySelectorAll('.product-photo').forEach(function(img) {
     if (img.dataset.zoomInit) return;
     img.dataset.zoomInit = '1';
-    img.addEventListener('click', function() { openLightbox(img.src, img.alt); });
+    img.addEventListener('click', function() {
+      var card = img.closest('.product-card');
+      var raw = card && card.dataset.images ? card.dataset.images.split(',').filter(Boolean) : [];
+      var images = raw.length
+        ? raw.map(function(s) { return { src: decodeURIComponent(s), alt: (card && card.dataset.name) || '' }; })
+        : [{ src: img.src, alt: img.alt }];
+      var idx = raw.length ? raw.indexOf(encodeURIComponent(img.src)) : 0;
+      openLightbox(images, Math.max(0, idx));
+    });
   });
 }
 
-function openLightbox(src, alt) {
+function _lbNav(dir) {
+  if (_lbImages.length <= 1) return;
+  _lbIdx = (_lbIdx + dir + _lbImages.length) % _lbImages.length;
+  _lbUpdateImg();
+}
+
+function _lbUpdateImg() {
   var lb = document.getElementById('photo-lightbox');
-  lb.querySelector('.lb-img').src = src;
-  lb.querySelector('.lb-img').alt = alt || '';
+  if (!lb) return;
+  var img = lb.querySelector('.lb-img');
+  img.style.opacity = '0';
+  setTimeout(function() {
+    img.src = _lbImages[_lbIdx].src;
+    img.alt = _lbImages[_lbIdx].alt || '';
+    img.style.opacity = '1';
+  }, 150);
+  var counter = lb.querySelector('.lb-counter');
+  if (counter) counter.textContent = _lbImages.length > 1 ? (_lbIdx + 1) + ' / ' + _lbImages.length : '';
+  var show = _lbImages.length > 1;
+  var prev = lb.querySelector('.lb-prev');
+  var next = lb.querySelector('.lb-next');
+  if (prev) prev.style.display = show ? 'flex' : 'none';
+  if (next) next.style.display = show ? 'flex' : 'none';
+}
+
+function openLightbox(images, index) {
+  _lbImages = Array.isArray(images) ? images : [{ src: images, alt: index || '' }];
+  _lbIdx = (typeof index === 'number' && index >= 0) ? index : 0;
+  var lb = document.getElementById('photo-lightbox');
+  if (!lb) return;
   lb.classList.add('open');
   document.body.style.overflow = 'hidden';
+  _lbUpdateImg();
 }
 
 function closeLightbox() {
@@ -679,15 +749,71 @@ function launchConfetti() {
   }
 }
 
+// ── BURGER MENU ──────────────────────────────────────
+
+function initBurgerMenu() {
+  document.querySelectorAll('.burger-btn').forEach(function(btn) {
+    var nav = btn.closest('nav');
+    if (!nav) return;
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var open = nav.classList.toggle('mobile-open');
+      btn.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', String(open));
+    });
+    nav.querySelectorAll('a').forEach(function(a) {
+      a.addEventListener('click', function() {
+        nav.classList.remove('mobile-open');
+        btn.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      });
+    });
+  });
+  document.addEventListener('click', function(e) {
+    document.querySelectorAll('nav.mobile-open').forEach(function(nav) {
+      if (!nav.contains(e.target)) {
+        nav.classList.remove('mobile-open');
+        var btn = nav.querySelector('.burger-btn');
+        if (btn) { btn.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); }
+      }
+    });
+  });
+}
+
 // ── CONTACT FORM ──────────────────────────────────────
 
 function initContactForm() {
   const form = document.getElementById('contact-form');
   if (!form) return;
-  form.addEventListener('submit', e => {
+  form.addEventListener('submit', function(e) {
     e.preventDefault();
-    showToast('Message envoyé ! Je vous réponds bientôt.');
-    form.reset();
+    const btn = form.querySelector('[type="submit"]');
+    const origText = btn.textContent;
+    btn.textContent = 'Envoi en cours…';
+    btn.disabled = true;
+    const get = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+    const prenom = get('prenom'), nom = get('nom'), email = get('email');
+    const sujet = get('sujet'), message = get('message');
+    if (!WEB3FORMS_KEY || WEB3FORMS_KEY === 'VOTRE_CLE_WEB3FORMS') {
+      showToast('Message envoyé ! Je vous réponds bientôt.');
+      form.reset(); btn.textContent = origText; btn.disabled = false; return;
+    }
+    fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        access_key: WEB3FORMS_KEY,
+        to: 'leslampesdenicky@gmail.com',
+        subject: 'Message de ' + prenom + ' ' + nom + (sujet ? ' — ' + sujet : ''),
+        message: 'De : ' + prenom + ' ' + nom + ' (' + email + ')\n\n' + message,
+        from_name: 'Les Lampes de Nicky — Contact',
+        replyto: email
+      })
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      if (data.success) { showToast('Message envoyé ! Je vous réponds bientôt.'); form.reset(); }
+      else { showToast('Erreur lors de l\'envoi. Réessayez.'); }
+    }).catch(function() { showToast('Erreur de connexion. Réessayez.'); })
+    .finally(function() { btn.textContent = origText; btn.disabled = false; });
   });
 }
 
@@ -886,7 +1012,10 @@ function hideDarkTeaser() {
   }
 
   // ── Helpers ──────────────────────────────────────────
-  function _catLabel(c) { return {suspension:'Suspension',table:'Lampe de table',applique:'Applique murale'}[c] || c; }
+  function _catLabel(c) {
+    return {'tissu-metallique':'Tissu métallique','fibre-naturelle':'Fibre naturelle','lampe-a-motif':'Lampe à motif','lin':'En lin',
+      suspension:'Suspension',table:'Lampe de table',applique:'Applique murale'}[c] || c;
+  }
 
   function _getImages(lamp) {
     if (lamp.images && lamp.images.length) return lamp.images;
@@ -1195,6 +1324,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initParallax();
   initHeroText();
   initDarkTeaser();
+  initBurgerMenu();
 
   // Back-to-top button
   (function() {
