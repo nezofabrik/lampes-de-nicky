@@ -56,48 +56,24 @@ header {
 .logo {
   display: flex;
   align-items: center;
-  gap: 0.9rem;
+  text-decoration: none;
 }
 
-.logo-icon {
-  width: 44px;
-  height: 44px;
-  flex-shrink: 0;
-  color: var(--beige);
-  transition: color 0.3s;
+.logo-img {
+  height: 52px;
+  width: auto;
+  display: block;
+  transition: opacity 0.2s;
 }
+.logo:hover .logo-img { opacity: 0.85; }
 
-.logo:hover .logo-icon { color: var(--peach); }
+/* Light mode: show dark logo (dark text) */
+.logo-img--light { display: none; }
+.logo-img--dark  { display: block; }
 
-.logo-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-}
-
-.logo-text .brand {
-  font-family: 'Raleway', sans-serif;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--mint);
-  opacity: 0.8;
-}
-
-.logo-text .name {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--beige);
-}
-
-.logo-text .sub {
-  font-family: 'Dancing Script', cursive;
-  font-size: 1.2rem;
-  color: var(--peach);
-  line-height: 1;
-}
+/* Dark mode: show light logo (white text) */
+[data-theme="dark"] .logo-img--dark  { display: none; }
+[data-theme="dark"] .logo-img--light { display: block; }
 
 /* Nav */
 nav {
