@@ -102,7 +102,6 @@ function renderCard(lamp) {
       ${lamp.badge ? `<span class="product-badge${lamp.badgeNew ? ' new' : ''}">${lamp.badge}</span>` : ''}
     </div>
     <div class="product-info">
-      <div class="product-category">${catLabel(lamp.category)}</div>
       <div class="product-name">${escapeHtml(lamp.name)}</div>
       <div class="product-desc">${escapeHtml(lamp.desc)}</div>
       ${lamp.comment ? `<div class="product-comment">"${escapeHtml(lamp.comment)}"</div>` : ''}
