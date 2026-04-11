@@ -60,20 +60,16 @@ header {
 }
 
 .logo-img {
-  height: 52px;
+  height: 64px;
   width: auto;
   display: block;
   transition: opacity 0.2s;
 }
 .logo:hover .logo-img { opacity: 0.85; }
 
-/* Light mode: show dark logo (dark text) */
-.logo-img--light { display: none; }
-.logo-img--dark  { display: block; }
-
-/* Dark mode: show light logo (white text) */
-[data-theme="dark"] .logo-img--dark  { display: none; }
-[data-theme="dark"] .logo-img--light { display: block; }
+/* Toujours afficher le logo clair */
+.logo-img--dark  { display: none; }
+.logo-img--light { display: block; }
 
 /* Nav */
 nav {
