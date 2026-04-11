@@ -67,10 +67,6 @@ header {
 }
 .logo:hover .logo-img { opacity: 0.85; }
 
-/* Toujours afficher le logo clair */
-.logo-img--dark  { display: none; }
-.logo-img--light { display: block; }
-
 /* Nav */
 nav {
   display: flex;
